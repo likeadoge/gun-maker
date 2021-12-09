@@ -27,7 +27,7 @@ export const shadow = (level: number) => {
         case 24: return { 'box-shadow': '0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12)' }
     }
 
-    return new Error('error shadow level !!!')
+    throw new Error('error shadow level !!!')
 }
 
 export const transition = ()=> ({'transition':'all 0.3s ease'})

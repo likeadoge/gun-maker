@@ -1,4 +1,4 @@
-import { css, View } from './Base'
+import { css, View } from '@/utils/view'
 
 
 @css('#app',el => { el.id = 'app'; return '#app' }, {

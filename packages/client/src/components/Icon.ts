@@ -1,4 +1,4 @@
-import { css, View } from './Base'
+import { css, View } from '@/utils/view'
 
 @css('.icon',el => { el.className += 'icon'}, {
     '': {

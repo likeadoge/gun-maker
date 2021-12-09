@@ -1,6 +1,6 @@
 import { Effect, Mut } from "@/reactive/base";
-import { shadow, transition } from "@/style/shadow";
-import { css, View } from "./Base";
+import { shadow, transition } from "@/style";
+import { css, View } from '@/utils/view'
 
 
 @css('.btn-group', v => v.className += 'btn-group', {

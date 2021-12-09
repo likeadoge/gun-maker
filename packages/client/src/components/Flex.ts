@@ -1,4 +1,4 @@
-import { css, View } from './Base'
+import { css, View } from '@/utils/view'
 
 @css('.flex-row',el => { el.className += 'flex-row'}, {
     '': {
@@ -25,6 +25,7 @@ export class FlexCol extends View {
 @css('.flex-fill',el => { el.className += 'flex-fill'}, {
     '': {
         'flex': 'auto',
+        'overflow': 'auto',
     }
 })
 export class FlexFill extends View {
