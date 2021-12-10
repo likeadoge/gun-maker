@@ -1,5 +1,6 @@
 import { Effect, Mut } from "@/reactive/base";
 import { shadow, transition } from "@/style";
+import { Pos } from "@/utils";
 import { css, View } from '@/utils/view'
 
 
@@ -77,4 +78,114 @@ export class ToggleBtn extends View {
         this.effect = new Effect(v => this.$el.classList[v ? 'add' : 'remove']('selected'))
         this.status.attach(this.effect)
     }
+
+    destory() {
+        super.destory()
+        this.status.detach(this.effect)
+    }
+}
+
+
+@css('.slider-btn', v => v.classList.add('slider-btn'), {
+    '&': {
+        'position': 'relative',
+        'margin': '0 12px',
+        'padding': '12px 0'
+    },
+    '&::before': {
+        'content': '""',
+        'display': 'block',
+        'height': '4px',
+        'border-radius': '2px',
+        'position': 'relative',
+        'background': '#66ccff',
+
+    },
+    'div': {
+        ...shadow(4),
+        'top': '2px',
+        'position': 'absolute',
+        'height': '24px',
+        'width': '24px',
+        'cursor': 'pointer',
+        'border-radius': '50%',
+        'background': '#ff1744',
+        'transform': 'translateX(-12px)'
+    },
+})
+
+export class SliderBtn extends View {
+    status: Mut<number>
+    effect: Effect<number>
+    slider: HTMLDivElement
+    move: SliderMovement
+    constructor(status: Mut<number>) {
+        super()
+        this.status = status
+        this.effect = new Effect(v => {
+            this.slider.style.left = v * 100 + '%'
+        })
+        this.slider = document.createElement('div')
+        this.$el.appendChild(this.slider)
+        this.move = new SliderMovement(this.$el, this.slider)
+        this.status.attach(this.effect)
+
+        this.move.getNow = () => this.status.val()
+        this.move.move = (s) => { this.status.set(s) }
+
+        this.status.set(this.status.val())
+
+    }
+}
+class SliderMovement {
+
+    el: HTMLElement
+    silder: HTMLElement
+
+    from?: number | 'start'
+    now: number = 0
+
+    constructor(el: HTMLElement, silder: HTMLElement) {
+        this.el = el
+        this.silder = silder
+
+        this.silder.onmousedown = () => {
+            this.from = 'start'
+            this.now = this.getNow()
+            this.silder.classList.add('mouse-move')
+
+            let { width } = this.el.getBoundingClientRect()
+
+            const move = (e:MouseEvent) => {
+                if (!this.from)
+                    return
+                else if (this.from === 'start')
+                    this.from = e.clientX
+                else {
+                    let x = e.clientX - this.from
+                    x = x / width + this.now
+                    x = x > 1 ? 1 : x < 0 ? 0 : x
+                    console.log(x)
+                    this.move(x)
+                }
+            }
+            const done = () => {
+                this.el.classList.remove('mouse-move')
+                document.removeEventListener('mousemove',move)
+                document.removeEventListener('mouseleave',done)
+                document.removeEventListener('mouseup',done)
+                this.done()
+                this.from = undefined
+            }
+
+            document.addEventListener('mousemove',move)
+            document.addEventListener('mouseleave',done)
+            document.addEventListener('mouseup',done)
+        }
+
+    }
+
+    move: (num: number) => void = (n) => { console.log(n) }
+    done: () => void = () => { }
+    getNow: () => number = () => 0
 }

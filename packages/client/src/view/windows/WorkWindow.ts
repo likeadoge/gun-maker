@@ -1,4 +1,4 @@
-import { Effect, Mut } from "@/reactive/base";
+import { Effect, Mut, Ref } from "@/reactive/base";
 import { shadow, transition } from "@/style";
 import { Pos, Size, style } from "@/utils";
 import { css, View } from "@/utils/view";
@@ -20,11 +20,11 @@ export class WorkWindow extends View {
 
     static ro = new ResizeObserver(entries => {
         for (let entry of entries) {
-            const cr = entry.contentRect;
+            // const cr = entry.contentRect;
             const ww = WorkWindow.map.get(entry.target)
 
             if (ww) {
-                ww.reset(new Size(cr.width, cr.height))
+                ww.reset()
             }
         }
     })
@@ -33,20 +33,25 @@ export class WorkWindow extends View {
 
     screen: Screen
     move: MouseMovement
+    scale: Ref<number>
+    scaleEff: Effect<number>
 
-    constructor() {
+    constructor({ scale }: { scale: Ref<number> }) {
         const $el = document.createElement('div')
         const canvas = document.createElement('canvas')
         const handle = new CanvasHandle(canvas)
-        const screen = new Screen(handle)
+        const screen = new Screen(handle, { scale })
         $el.appendChild(canvas)
 
 
         super($el)
         const { height, width } = this.$el.getBoundingClientRect()
         this.screen = screen
+        this.scale = scale
+        this.scaleEff = new Effect(() => { this.reset() })
+        this.scale.attach(this.scaleEff)
         this.screen.update(new Size(width, height))
-        this.move = new MouseMovement(this.$el)
+        this.move = new MouseMovement(this.$el, { scale: this.scale })
         this.move.getNow = () => this.screen.offset
         this.move.move = (p) => {
             this.screen.offset = p
@@ -57,13 +62,16 @@ export class WorkWindow extends View {
         WorkWindow.ro.observe(this.$el)
     }
 
-    reset(size: Size) {
-        this.screen.update(size)
+    reset() {
+        const { width, height } = this.$el.getBoundingClientRect()
+        const scale = this.scale.val()
+        this.screen.update(new Size(width * scale, height * scale))
     }
 
     destory() {
         super.destory()
         WorkWindow.ro.unobserve(this.$el)
+        this.scale.detach(this.scaleEff)
     }
 }
 
@@ -75,7 +83,7 @@ class CanvasHandle {
     canvas: HTMLCanvasElement = null as any
     ctx: CanvasRenderingContext2D = null as any
 
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement,) {
         this.canvas = canvas
         const ctx = this.canvas.getContext('2d')
         if (!ctx) throw new Error('canvas error!!!')
@@ -85,9 +93,9 @@ class CanvasHandle {
     resetSize({ height, width }: Size) {
         this.size = new Size(width, height)
         this.canvas.height = height
-        this.canvas.style.height = height + 'px'
-        this.canvas.style.width = width + 'px'
         this.canvas.width = width
+        this.canvas.style.height = '100%'
+        this.canvas.style.width = '100%'
         this.clear()
     }
 
@@ -122,13 +130,15 @@ class CanvasHandle {
 
 }
 class Screen {
-    constructor(handle: CanvasHandle) {
+    constructor(handle: CanvasHandle, op: { scale: Ref<number> }) {
         this.handle = handle
+        this.scale = op.scale
     }
 
     offset = new Pos(0, 0)
     origin = new Pos(0, 0)
     viewSize = new Size(600, 800)
+    scale: Ref<number>
 
     handle: CanvasHandle
     screenSize() { return this.handle.size }
@@ -157,7 +167,9 @@ class Screen {
 
             this.handle.line(
                 new CanvasPos(this.transX(0), 0),
-                new CanvasPos(this.transX(0), this.screenSize().height)
+                new CanvasPos(this.transX(0), this.screenSize().height), {
+                width: 2
+            }
             )
         }
 
@@ -167,7 +179,9 @@ class Screen {
         ) {
             this.handle.line(
                 new CanvasPos(0, this.transY(0)),
-                new CanvasPos(this.screenSize().width, this.transY(0)),
+                new CanvasPos(this.screenSize().width, this.transY(0)), {
+                width: 2
+            }
             )
         }
 
@@ -188,16 +202,17 @@ class Screen {
     }
 
 }
-
 class MouseMovement {
 
     el: HTMLElement
 
     from?: Pos | 'start'
     now: Pos = new Pos(0, 0)
+    scale: Ref<number>
 
-    constructor(el: HTMLElement) {
+    constructor(el: HTMLElement, op: { scale: Ref<number> }) {
         this.el = el
+        this.scale = op.scale
 
         this.el.onmousedown = () => {
             this.from = 'start'
@@ -210,8 +225,8 @@ class MouseMovement {
                 else if (this.from === 'start')
                     this.from = new Pos(e.clientX, e.clientY)
                 else {
-                    const x = e.clientX - this.from.x
-                    const y = -(e.clientY - this.from.y)
+                    const x = (e.clientX - this.from.x) * this.scale.val()
+                    const y = -(e.clientY - this.from.y) * this.scale.val()
                     this.move(this.now.trans(_ => x + _, _ => y + _))
                 }
             }
@@ -229,6 +244,8 @@ class MouseMovement {
     move: (p: Pos) => void = () => { }
     getNow: () => Pos = () => new Pos(0, 0)
 }
-style({'.mouse-move':{
-    'cursor':'move'
-}})
+style({
+    '.mouse-move': {
+        'cursor': 'move'
+    }
+})

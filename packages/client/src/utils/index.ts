@@ -70,6 +70,10 @@ export class Size {
         this.width = width
         this.height = height
     }
+
+    scale(fn:(n:number)=>number){
+        return new Size(fn(this.width),fn(this.height))
+    }
 }
 export class Matrix3x3 {
     val: [

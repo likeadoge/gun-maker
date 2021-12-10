@@ -1,8 +1,9 @@
 import { App } from "@/components/App"
-import { BtnGroup, ToggleBtn } from "@/components/Btn"
+import { BtnGroup, ToggleBtn, SliderBtn } from "@/components/Btn"
 import { FlexCol, FlexFill, FlexFixed, FlexRow } from "@/components/Flex"
 import { Icon } from "@/components/Icon"
 import { globe } from "@/model/globe"
+import { Reactive } from "@/reactive/base"
 import { shadow } from "@/style"
 import { WorkWindow } from './windows/WorkWindow'
 
@@ -20,8 +21,10 @@ export const initView = () => {
                                 .child(
                                     new FlexFill()
                                         .css(shadow(4))
-                                        .css({margin:'12px'})
-                                        .child(new WorkWindow())
+                                        .css({ margin: '12px' })
+                                        .child(new WorkWindow({
+                                            scale: globe.screenScale
+                                        }))
                                 )
                                 .child(
                                     new FlexFixed()
@@ -50,6 +53,15 @@ export const initView = () => {
                                     (val, t) => t.set(val ? 'rotate' : null)
                                 )
                             ).child(new Icon('rotate')))
+                            .child(new SliderBtn(globe.screenScale.transform(v => {
+                                const s = (v: number) => (Math.log2(v) + 1) / 2
+                                return s(v.val())
+                            }, (s, t) => {
+                                const m = (v: number) => 2 ** (2 * (v - 0.5))
+                                t.set(m(s))
+                            }))
+                                .style(v => v.width = '200px')
+                            )
                         )
                 )
 
