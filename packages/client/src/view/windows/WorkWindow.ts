@@ -1,4 +1,6 @@
-import { Effect, Mut, Ref } from "@/reactive/base";
+import { Img } from "@/model/Image";
+import { Layer, LayerScreen, Rotate } from "@/model/layer";
+import { Effect, Mut, Reactive, Ref } from "@/reactive/base";
 import { shadow, transition } from "@/style";
 import { Pos, Size, style } from "@/utils";
 import { css, View } from "@/utils/view";
@@ -35,8 +37,10 @@ export class WorkWindow extends View {
     move: MouseMovement
     scale: Ref<number>
     scaleEff: Effect<number>
+    layers: Reactive<Layer[]>
+    layersEff: Effect<Layer[]>
 
-    constructor({ scale }: { scale: Ref<number> }) {
+    constructor({ scale, layers }: { scale: Ref<number>, layers: Reactive<Layer[]> }) {
         const $el = document.createElement('div')
         const canvas = document.createElement('canvas')
         const handle = new CanvasHandle(canvas)
@@ -47,31 +51,60 @@ export class WorkWindow extends View {
         super($el)
         const { height, width } = this.$el.getBoundingClientRect()
         this.screen = screen
+
         this.scale = scale
         this.scaleEff = new Effect(() => { this.reset() })
         this.scale.attach(this.scaleEff)
-        this.screen.update(new Size(width, height))
+
+        this.layers = layers
+        this.layersEff = new Effect(() => {
+            const layers = this.layers.val()
+            this.screen.update({ layers })
+        })
+        this.layers.attach(this.layersEff)
+
+        const size = new Size(width, height)
+        this.screen.update({ size })
+
         this.move = new MouseMovement(this.$el, { scale: this.scale })
         this.move.getNow = () => this.screen.offset
-        this.move.move = (p) => {
-            this.screen.offset = p
-            this.screen.update()
+        this.move.move = (offset) => {
+            this.screen.update({ offset })
         }
 
         WorkWindow.map.set(this.$el, this)
         WorkWindow.ro.observe(this.$el)
+
+
+
+        const img = new Img(`https://photo.16pic.com/00/61/76/16pic_6176781_b.jpg`)
+
+        img.done.then(() => {
+
+            const l1 = new Layer(img)
+            const l2 = new Layer(img)
+
+            l1.transforms = [new Rotate(new Pos(100),0)]
+            l2.transforms = [new Rotate(new Pos(100),Math.PI/6)]
+
+            this.layers.set([l1,l2])
+
+        })
+
     }
 
     reset() {
         const { width, height } = this.$el.getBoundingClientRect()
         const scale = this.scale.val()
-        this.screen.update(new Size(width * scale, height * scale))
+        const size = new Size(width * scale, height * scale)
+        this.screen.update({ size })
     }
 
     destory() {
         super.destory()
         WorkWindow.ro.unobserve(this.$el)
         this.scale.detach(this.scaleEff)
+        this.layers.detach(this.layersEff)
     }
 }
 
@@ -96,7 +129,6 @@ class CanvasHandle {
         this.canvas.width = width
         this.canvas.style.height = '100%'
         this.canvas.style.width = '100%'
-        this.clear()
     }
 
     line(begin: CanvasPos, end: CanvasPos,
@@ -122,6 +154,9 @@ class CanvasHandle {
             this.ctx.strokeRect(pos.x, pos.y, size.width, size.height)
         }
     }
+    img(img: CanvasImageSource, pos: Pos) {
+        this.ctx.drawImage(img, pos.x, pos.y)
+    }
 
     clear() {
         this.ctx.clearRect(0, 0, this.size.width, this.size.height)
@@ -137,7 +172,9 @@ class Screen {
 
     offset = new Pos(0, 0)
     origin = new Pos(0, 0)
-    viewSize = new Size(600, 800)
+    layerScreens: LayerScreen[] = []
+
+    viewSize = new Size(200, 200)
     scale: Ref<number>
 
     handle: CanvasHandle
@@ -190,15 +227,29 @@ class Screen {
         const p = new Pos(-this.viewSize.width / 2, this.viewSize.height / 2)
         this.handle.rect(this.trans(p), this.viewSize, { fill: false })
     }
-
-    update(size?: Size) {
+    layer() {
+        this.layerScreens.forEach(v => {
+            v.offset = this.offset
+            v.size = this.screenSize()
+            v.render()
+            this.handle.img(v.screen, new Pos(0, 0))
+        })
+    }
+    update({ size, offset, layers }: { size?: Size, offset?: Pos, layers?: Layer[] }) {
         if (size) {
             this.handle.resetSize(size)
-        } else {
-            this.handle.clear()
         }
-        this.axis()
+        if (offset) {
+            this.offset = offset
+        }
+        if (layers) {
+            this.layerScreens = layers.map(v =>
+                new LayerScreen(v, this.screenSize(), this.offset))
+        }
+        this.handle.clear()
+        this.layer()
         this.view()
+        this.axis()
     }
 
 }

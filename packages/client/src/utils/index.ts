@@ -50,13 +50,25 @@ export class Pos {
     x: number = 0 // left
     y: number = 0 // top
 
-    constructor(x: number, y: number) {
+    constructor(x: number, y: number = x) {
         this.x = x
         this.y = y
     }
 
     trans(x: (n: number) => number, y: (n: number) => number = x) {
         return new Pos(x(this.x), y(this.y))
+    }
+
+    add(pos: Pos) {
+        return new Pos(this.x + pos.x, this.y + pos.y)
+    }
+
+    sub(pos: Pos) {
+        return new Pos(this.x - pos.x, this.y - pos.y)
+    }
+
+    mul(pos: Pos){
+        return new Pos(this.x * pos.x, this.y * pos.y)
     }
 }
 
@@ -65,14 +77,14 @@ export class Size {
     height: number = 100
     width: number = 100
 
-    
+
     constructor(width: number, height: number) {
         this.width = width
         this.height = height
     }
 
-    scale(fn:(n:number)=>number){
-        return new Size(fn(this.width),fn(this.height))
+    scale(fn: (n: number) => number) {
+        return new Size(fn(this.width), fn(this.height))
     }
 }
 export class Matrix3x3 {
@@ -95,12 +107,12 @@ export class Matrix3x3 {
             x1_1, x1_2, x1_3,
             x2_1, x2_2, x2_3,
             x3_1, x3_2, x3_3,
-        ] = this.val
+        ] = mat.val
         const [
             y1_1, y1_2, y1_3,
             y2_1, y2_2, y2_3,
             y3_1, y3_2, y3_3,
-        ] = mat.val
+        ] = this.val
 
         return new Matrix3x3(
             ...[
@@ -120,5 +132,13 @@ export class Matrix3x3 {
             ] as [number, number, number],
         )
 
+    }
+
+    trans():[number, number, number,number, number, number]{
+        const [
+            x1_1, x1_2, x1_3,
+            x2_1, x2_2, x2_3,
+        ] = this.val
+        return [x1_1,x2_1,x1_2,x2_2,x1_3,x2_3]
     }
 }

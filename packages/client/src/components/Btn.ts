@@ -165,7 +165,6 @@ class SliderMovement {
                     let x = e.clientX - this.from
                     x = x / width + this.now
                     x = x > 1 ? 1 : x < 0 ? 0 : x
-                    console.log(x)
                     this.move(x)
                 }
             }
