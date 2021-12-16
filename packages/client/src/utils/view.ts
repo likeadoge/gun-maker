@@ -35,8 +35,8 @@ export class View {
 
     }
 
-    destory() {
-        this.children.forEach(v => v.destory())
+    destroy() {
+        this.children.forEach(v => v.destroy())
     }
 }
 

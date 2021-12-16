@@ -37,10 +37,10 @@ export class WorkWindow extends View {
     move: MouseMovement
     scale: Ref<number>
     scaleEff: Effect<number>
-    layers: Reactive<Layer[]>
-    layersEff: Effect<Layer[]>
+    layers: Ref<Ref<Layer>[]>
+    layersEff: Effect<Ref<Layer>[]>
 
-    constructor({ scale, layers }: { scale: Ref<number>, layers: Reactive<Layer[]> }) {
+    constructor({ scale, layers }: { scale: Ref<number>, layers: Ref<Ref<Layer>[]> }) {
         const $el = document.createElement('div')
         const canvas = document.createElement('canvas')
         const handle = new CanvasHandle(canvas)
@@ -58,7 +58,7 @@ export class WorkWindow extends View {
 
         this.layers = layers
         this.layersEff = new Effect(() => {
-            const layers = this.layers.val()
+            const layers = this.layers.val().map(v=>v.val())
             this.screen.update({ layers })
         })
         this.layers.attach(this.layersEff)
@@ -77,19 +77,19 @@ export class WorkWindow extends View {
 
 
 
-        const img = new Img(`https://photo.16pic.com/00/61/76/16pic_6176781_b.jpg`)
+        // const img = new Img(`https://photo.16pic.com/00/61/76/16pic_6176781_b.jpg`)
 
-        img.done.then(() => {
+        // img.done.then(() => {
 
-            const l1 = new Layer(img)
-            const l2 = new Layer(img)
+        //     const l1 = new Layer(img)
+        //     const l2 = new Layer(img)
 
-            l1.transforms = [new Rotate(new Pos(100),0)]
-            l2.transforms = [new Rotate(new Pos(100),Math.PI/6)]
+        //     l1.transforms = [new Rotate(new Pos(100),0)]
+        //     l2.transforms = [new Rotate(new Pos(100),Math.PI/6)]
 
-            this.layers.set([l1,l2])
+        //     this.layers.set([l1,l2])
 
-        })
+        // })
 
     }
 
@@ -100,14 +100,13 @@ export class WorkWindow extends View {
         this.screen.update({ size })
     }
 
-    destory() {
-        super.destory()
+    destroy() {
+        super.destroy()
         WorkWindow.ro.unobserve(this.$el)
         this.scale.detach(this.scaleEff)
         this.layers.detach(this.layersEff)
     }
 }
-
 class CanvasPos extends Pos { }
 
 class CanvasHandle {

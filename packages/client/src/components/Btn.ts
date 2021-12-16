@@ -79,8 +79,8 @@ export class ToggleBtn extends View {
         this.status.attach(this.effect)
     }
 
-    destory() {
-        super.destory()
+    destroy() {
+        super.destroy()
         this.status.detach(this.effect)
     }
 }

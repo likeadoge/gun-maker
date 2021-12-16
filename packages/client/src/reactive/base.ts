@@ -1,7 +1,7 @@
 import { Head, Tail } from "@/types"
 
 export interface Watcher<T> {
-    emit: (r: Reactive<T>) => void
+    emit: (r: Reactive<T>, old: T) => void
     destroy: () => void
 }
 
@@ -9,6 +9,10 @@ export abstract class Ref<T> {
     abstract val(): T
     abstract attach(w: Watcher<T>): void
     abstract detach(w: Watcher<T>): void
+
+    static gen<T>(t: MayRef<T>): Ref<T> {
+        return t instanceof Ref ? t : new Reactive(t)
+    }
 
     compute<S>(compute: (t: this) => S): Ref<S> {
         return new Computed<[this], S>([this], compute)
@@ -19,6 +23,10 @@ export abstract class Mut<T> extends Ref<T> {
     abstract set(t: T): void
     abstract update(fn: (t: T) => T): void
 
+    static gen<T>(t: MayMut<T>): Mut<T> {
+        return t instanceof Ref ? t : new Reactive(t)
+    }
+
     transform<S>(compute: (t: this) => S, update: (v: S, t: this) => void): Mut<S> {
         return new Transform<[this], S>([this], compute, update)
     }
@@ -27,17 +35,14 @@ export abstract class Mut<T> extends Ref<T> {
 export class Reactive<T> extends Mut<T>{
     #val: T
     #watchers: Watcher<T>[] = []
+    #parent?: Mut<any>
 
-
-    static new<T>(val: T | Reactive<T>) {
-        return val instanceof Reactive ? val : new Reactive(val)
-    }
-
-    constructor(val: T | Reactive<T>) {
+    constructor(val: T | Reactive<T>, parent?: Mut<any>) {
         super()
         if (val instanceof Reactive)
             throw new Error("reactive: can't reactive val twice!")
         this.#val = val
+        this.#parent = parent
     }
     // 取值
     val() {
@@ -45,8 +50,12 @@ export class Reactive<T> extends Mut<T>{
     }
     // 赋值
     set(newVal: T) {
+        const old = this.#val
         this.#val = newVal
-        this.#watchers.forEach(v => v.emit(this))
+        this.#watchers.forEach(v => v.emit(this, old))
+        if (this.#parent) {
+            this.#parent.set(this.#parent.val())
+        }
     }
     // 更新（赋值语法糖）
     update(fn: (t: T) => T) {
@@ -153,3 +162,7 @@ export class Effect<T> implements Watcher<T>{
         this.#target?.detach(this)
     }
 }
+
+export type MayRef<T> = T | Ref<T>
+
+export type MayMut<T> = T | Mut<T>
