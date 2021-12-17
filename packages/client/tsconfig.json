@@ -7,11 +7,13 @@
       "dom.iterable",
       "es2019"
     ],
+    "jsx": "preserve",
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "./types",
     "rootDir": "./src",
     "strict": true,
+    "noImplicitThis": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "target": "ESNext",

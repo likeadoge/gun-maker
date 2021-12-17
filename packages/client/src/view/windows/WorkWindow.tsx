@@ -1,10 +1,8 @@
-import { Img } from "@/model/Image";
+
 import { Layer, LayerScreen, Rotate } from "@/model/layer";
 import { Effect, Mut, Reactive, Ref } from "@/reactive/base";
-import { shadow, transition } from "@/style";
 import { Pos, Size, style } from "@/utils";
 import { css, View } from "@/utils/view";
-
 
 @css<typeof WorkWindow>('.work-window', v => v.classList.add('work-window'), {
     '&': {
@@ -74,23 +72,6 @@ export class WorkWindow extends View {
 
         WorkWindow.map.set(this.$el, this)
         WorkWindow.ro.observe(this.$el)
-
-
-
-        // const img = new Img(`https://photo.16pic.com/00/61/76/16pic_6176781_b.jpg`)
-
-        // img.done.then(() => {
-
-        //     const l1 = new Layer(img)
-        //     const l2 = new Layer(img)
-
-        //     l1.transforms = [new Rotate(new Pos(100),0)]
-        //     l2.transforms = [new Rotate(new Pos(100),Math.PI/6)]
-
-        //     this.layers.set([l1,l2])
-
-        // })
-
     }
 
     reset() {
