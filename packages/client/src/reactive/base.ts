@@ -140,20 +140,20 @@ export class Transform<S extends any[], T> extends Mut<T> implements Watcher<unk
 }
 
 export class Effect<T> implements Watcher<T>{
-    #target: Reactive<T> | null = null
+    #target: Ref<T> | null = null
     #fn = (t: T) => { }
     constructor(
         fn: (t: T) => void,
-        target: Reactive<T> | null = null
+        target: Ref<T> | null = null
     ) {
 
         this.#fn = fn
         this.attachTo(target)
     }
-    emit(t: Reactive<T>) {
+    emit(t: Ref<T>) {
         this.#fn(t.val())
     }
-    attachTo(target: Reactive<T> | null) {
+    attachTo(target: Ref<T> | null) {
         this.#target?.detach(this)
         this.#target = target
         this.#target?.attach(this)
