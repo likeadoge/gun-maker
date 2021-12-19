@@ -5,3 +5,8 @@ declare namespace JSX {
 
     type Element = HTMLElement
 }
+declare type OffscreenCanvasRenderingContext2D = CanvasRenderingContext2D 
+
+declare class  OffscreenCanvas extends HTMLCanvasElement{
+    constructor(width:number,height:number) {}
+}

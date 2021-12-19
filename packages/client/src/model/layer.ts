@@ -1,7 +1,11 @@
-import { Effect, Mut, Reactive, Ref, Watcher } from "@/reactive/base"
+import { Computed, Effect, Mut, Reactive, Ref, Watcher } from "@/reactive/base"
 import { Matrix3x3, Pos, Size } from "@/utils"
 import { Img } from "./Image"
-import { Move, Transfrom } from "./Transform"
+import { Move, Scale, Transfrom } from "./Transform"
+import { screen } from './Screen'
+import { CacheList } from "@/reactive/cache"
+
+
 
 
 export class Layer {
@@ -112,3 +116,11 @@ export class LayerScreen {
 }
 
 export const layerList: Mut<Mut<Layer>[]> = new Reactive<Mut<Layer>[]>([])
+
+const globalTransfrom = new Computed<[Ref<Move>, Ref<Scale>], Matrix3x3>([screen.move, screen.scale], (move, size) => {
+    return move.val().matrix().mul(size.val().matrix())
+})
+
+export const layerScreenList = new CacheList<Mut<Layer>, Ref<LayerScreen>>(layerList, (layer) => layer
+    .compute(layer =>new LayerScreen(layer, screen.size, globalTransfrom))
+)

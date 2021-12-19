@@ -8,4 +8,4 @@ export class Sight {
     scale = new Reactive(new Scale(new Pos(0), new Pos(0)))
 }
 
-export const view = new Sight()
+export const sight = new Sight()

@@ -1,4 +1,4 @@
-import { Layer } from "@/model/layer";
+import { Layer } from "@/model/Layer";
 import { Ref, Watcher } from "@/reactive/base";
 import { CacheList } from "@/reactive/cache";
 import { View } from "@/utils/view";

@@ -1,4 +1,4 @@
-import { Head, Tail } from "@/types"
+// import { Head, Tail } from "@/types"
 
 export interface Watcher<T> {
     emit: (r: Reactive<T>, old: T) => void
@@ -10,12 +10,27 @@ export abstract class Ref<T> {
     abstract attach(w: Watcher<T>): void
     abstract detach(w: Watcher<T>): void
 
+
+
     static gen<T>(t: MayRef<T>): Ref<T> {
         return t instanceof Ref ? t : new Reactive(t)
     }
 
     compute<S>(compute: (t: this) => S): Ref<S> {
         return new Computed<[this], S>([this], compute)
+    }
+
+
+    
+    protected parents: Mut<any>[] = []
+
+    public parent(t:Mut<any>):this{
+        this.parents.push(t)
+        return this
+    }
+
+    protected emitParents(){
+        this.parents.forEach(element => {element.set(element.val())});
     }
 }
 
@@ -30,19 +45,18 @@ export abstract class Mut<T> extends Ref<T> {
     transform<S>(compute: (t: this) => S, update: (v: S, t: this) => void): Mut<S> {
         return new Transform<[this], S>([this], compute, update)
     }
+
 }
 
 export class Reactive<T> extends Mut<T>{
     #val: T
     #watchers: Watcher<T>[] = []
-    #parent?: Mut<any>
 
-    constructor(val: T | Reactive<T>, parent?: Mut<any>) {
+    constructor(val: T | Reactive<T>) {
         super()
         if (val instanceof Reactive)
             throw new Error("reactive: can't reactive val twice!")
         this.#val = val
-        this.#parent = parent
     }
     // 取值
     val() {
@@ -53,9 +67,7 @@ export class Reactive<T> extends Mut<T>{
         const old = this.#val
         this.#val = newVal
         this.#watchers.forEach(v => v.emit(this, old))
-        if (this.#parent) {
-            this.#parent.set(this.#parent.val())
-        }
+        this.emitParents()
     }
     // 更新（赋值语法糖）
     update(fn: (t: T) => T) {
@@ -91,6 +103,7 @@ export class Computed<S extends any[], T> extends Ref<T> implements Watcher<unkn
 
     emit() {
         this.#target.set(this.calcu())
+        this.emitParents()
     }
 
     destroy() {
@@ -125,6 +138,7 @@ export class Transform<S extends any[], T> extends Mut<T> implements Watcher<unk
 
     emit() {
         this.#target.set(this.calcu())
+        this.emitParents()
     }
 
     destroy() {

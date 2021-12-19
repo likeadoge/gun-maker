@@ -1,7 +1,7 @@
 
-import { Layer, LayerScreen, Rotate } from "@/model/layer";
-import { Effect, Mut, Reactive, Ref } from "@/reactive/base";
-import { Pos, Size, style } from "@/utils";
+import { Layer, layerScreenList } from "@/model/Layer";
+import { Effect, Mut, Reactive, Ref, Watcher } from "@/reactive/base";
+import { nextTick, Pos, Size, style } from "@/utils";
 import { css, View } from "@/utils/view";
 
 @css<typeof WorkWindow>('.work-window', v => v.classList.add('work-window'), {
@@ -56,7 +56,7 @@ export class WorkWindow extends View {
 
         this.layers = layers
         this.layersEff = new Effect(() => {
-            const layers = this.layers.val().map(v=>v.val())
+            const layers = this.layers.val().map(v => v.val())
             this.screen.update({ layers })
         })
         this.layers.attach(this.layersEff)
@@ -88,7 +88,7 @@ export class WorkWindow extends View {
         this.layers.detach(this.layersEff)
     }
 }
-class CanvasPos extends Pos { }
+class CanvasPos extends Pos { _ = 'canvas' }
 
 class CanvasHandle {
     size = new Size(100, 100)
@@ -144,92 +144,30 @@ class CanvasHandle {
 
 
 }
-class Screen {
-    constructor(handle: CanvasHandle, op: { scale: Ref<number> }) {
+class Screen implements Watcher<Ref<Layer>[]>{
+
+    private handle : CanvasHandle
+    constructor(handle:CanvasHandle){
         this.handle = handle
-        this.scale = op.scale
+        this.layers.attach(this)
     }
+    private layers = layerScreenList
+    private update(){
+        const layers = this.layers.val().map(v=>v.val())
 
-    offset = new Pos(0, 0)
-    origin = new Pos(0, 0)
-    layerScreens: LayerScreen[] = []
-
-    viewSize = new Size(200, 200)
-    scale: Ref<number>
-
-    handle: CanvasHandle
-    screenSize() { return this.handle.size }
-
-    // 坐标转换函数
-    trans(pos: Pos) {
-        const x = this.transX(pos.x)
-        const y = this.transY(pos.y)
-        return new CanvasPos(x, y)
-    }
-    transX(x: number) {
-        return this.screenSize().width / 2 + this.offset.x + x
-    }
-    transY(y: number) {
-        return this.screenSize().height / 2 - this.offset.y - y
-    }
-
-    // 画坐标轴
-    axis() {
-        const { x, y } = this.offset
-
-        if (
-            x < this.screenSize().width / 2
-            && x > (-this.screenSize().width / 2)
-        ) {
-
-            this.handle.line(
-                new CanvasPos(this.transX(0), 0),
-                new CanvasPos(this.transX(0), this.screenSize().height), {
-                width: 2
-            }
-            )
-        }
-
-        if (
-            y < this.screenSize().height / 2
-            && y > (-this.screenSize().height / 2)
-        ) {
-            this.handle.line(
-                new CanvasPos(0, this.transY(0)),
-                new CanvasPos(this.screenSize().width, this.transY(0)), {
-                width: 2
-            }
-            )
-        }
-
-    }
-    view() {
-        const p = new Pos(-this.viewSize.width / 2, this.viewSize.height / 2)
-        this.handle.rect(this.trans(p), this.viewSize, { fill: false })
-    }
-    layer() {
-        this.layerScreens.forEach(v => {
-            v.offset = this.offset
-            v.size = this.screenSize()
-            v.render()
-            this.handle.img(v.screen, new Pos(0, 0))
+        this.handle.clear()
+        layers.forEach(v=>{
+            this.handle.img(v.screen,new Pos(0))
         })
     }
-    update({ size, offset, layers }: { size?: Size, offset?: Pos, layers?: Layer[] }) {
-        if (size) {
-            this.handle.resetSize(size)
-        }
-        if (offset) {
-            this.offset = offset
-        }
-        if (layers) {
-            this.layerScreens = layers.map(v =>
-                new LayerScreen(v, this.screenSize(), this.offset))
-        }
-        this.handle.clear()
-        this.layer()
-        this.view()
-        this.axis()
+
+    async emit(){
+        await nextTick()
+        this.update()
+    }
+
+    destroy(){
+        this.layers.detach(this)
     }
 
 }

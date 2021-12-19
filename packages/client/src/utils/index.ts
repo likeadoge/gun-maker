@@ -46,6 +46,8 @@ export const complete = new Promise(res => {
     s()
 })
 
+export const nextTick = () => new Promise(res => { setTimeout(res, 0) })
+
 export class Pos {
     x: number = 0 // left
     y: number = 0 // top
@@ -67,7 +69,7 @@ export class Pos {
         return new Pos(this.x - pos.x, this.y - pos.y)
     }
 
-    mul(pos: Pos){
+    mul(pos: Pos) {
         return new Pos(this.x * pos.x, this.y * pos.y)
     }
 }
@@ -134,11 +136,11 @@ export class Matrix3x3 {
 
     }
 
-    trans():[number, number, number,number, number, number]{
+    trans(): [number, number, number, number, number, number] {
         const [
             x1_1, x1_2, x1_3,
             x2_1, x2_2, x2_3,
         ] = this.val
-        return [x1_1,x2_1,x1_2,x2_2,x1_3,x2_3]
+        return [x1_1, x2_1, x1_2, x2_2, x1_3, x2_3]
     }
 }
