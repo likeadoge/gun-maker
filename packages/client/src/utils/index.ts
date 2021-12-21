@@ -26,8 +26,6 @@ export const style = (s: StyleOp, upper: string = '') => {
         }`
         e.innerHTML += html
 
-        console.log(html)
-
         if (values.$next) { style(values.$next, `${upper}${sel(selector)}`) }
     })
 

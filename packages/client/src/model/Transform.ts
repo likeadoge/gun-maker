@@ -62,15 +62,15 @@ export class Rotate extends Transfrom {
         const sin = Math.sin(this.angle)
         const cos = Math.cos(this.angle)
 
-        const ori = this.origin.add(o.trans(x => x, y => -y))
+        // const ori = this.origin.add(o.trans(x => x, y => -y))
 
-        const step0 = new Move(ori.trans(n => -n)).matrix()
+        const step0 = new Move(this.origin.trans(n => -n)).matrix()
         const step1 = new Matrix3x3(
             cos, -sin, 0,
             sin, cos, 0,
             0, 0, 1
         )
-        const step2 = new Move(ori.trans(n => n)).matrix()
+        const step2 = new Move(this.origin.trans(n => n)).matrix()
 
         return step0.mul(step1).mul(step2)
     }

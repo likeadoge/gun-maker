@@ -1,14 +1,14 @@
-import { Layer } from "@/model/Layer";
+import { Part } from "@/model/Part";
 import { Ref, Watcher } from "@/reactive/base";
 import { CacheList } from "@/reactive/cache";
 import { View } from "@/utils/view";
 
 export class LayerList extends View implements Watcher<LayerItem[]>{
 
-    #cache: CacheList<Ref<Layer>, LayerItem>
+    #cache: CacheList<Ref<Part>, LayerItem>
     #container: HTMLUListElement
 
-    constructor(layers: Ref<Ref<Layer>[]>) {
+    constructor(layers: Ref<Ref<Part>[]>) {
         super()
         this.#cache = new CacheList(layers, s => new LayerItem(s), true)
         this.#container = document.createElement('ul')
@@ -42,9 +42,9 @@ export class LayerItem extends View {
 
 
     title: HTMLElement
-    layer: Ref<Layer>
+    layer: Ref<Part>
 
-    constructor(layer: Ref<Layer>) {
+    constructor(layer: Ref<Part>) {
         super(document.createElement('li'))
         this.layer = layer
 

@@ -1,8 +1,10 @@
 
-import { Layer, layerScreenList } from "@/model/Layer";
-import { Effect, Mut, Reactive, Ref, Watcher } from "@/reactive/base";
-import { nextTick, Pos, Size, style } from "@/utils";
+import { Part, layerScreenList, PartLayerScreen } from "@/model/Part";
+import { asyncEmit, Effect, Mut, Reactive, Ref, Watcher } from "@/reactive/base";
+import { Matrix3x3, nextTick, Pos, Size, style } from "@/utils";
 import { css, View } from "@/utils/view";
+import { LayerScreen, screen } from "@/model/Screen"
+import { Move, Scale } from "@/model/Transform";
 
 @css<typeof WorkWindow>('.work-window', v => v.classList.add('work-window'), {
     '&': {
@@ -16,79 +18,76 @@ import { css, View } from "@/utils/view";
         'width': '100%',
     }
 })
-export class WorkWindow extends View {
+export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3>, Watcher<Ref<PartLayerScreen>[]>{
 
     static ro = new ResizeObserver(entries => {
         for (let entry of entries) {
-            // const cr = entry.contentRect;
-            const ww = WorkWindow.map.get(entry.target)
-
-            if (ww) {
-                ww.reset()
-            }
+            const cr = entry.contentRect;
+            screen.size.set(new Size(Math.floor(cr.width), Math.floor(cr.height)))
         }
     })
 
-    static map = new WeakMap<Element, WorkWindow>()
+    handle: CanvasHandle
+    movement: MouseMovement
 
-    screen: Screen
-    move: MouseMovement
-    scale: Ref<number>
-    scaleEff: Effect<number>
-    layers: Ref<Ref<Layer>[]>
-    layersEff: Effect<Ref<Layer>[]>
-
-    constructor({ scale, layers }: { scale: Ref<number>, layers: Ref<Ref<Layer>[]> }) {
+    constructor() {
         const $el = document.createElement('div')
         const canvas = document.createElement('canvas')
-        const handle = new CanvasHandle(canvas)
-        const screen = new Screen(handle, { scale })
         $el.appendChild(canvas)
-
-
         super($el)
-        const { height, width } = this.$el.getBoundingClientRect()
-        this.screen = screen
 
-        this.scale = scale
-        this.scaleEff = new Effect(() => { this.reset() })
-        this.scale.attach(this.scaleEff)
-
-        this.layers = layers
-        this.layersEff = new Effect(() => {
-            const layers = this.layers.val().map(v => v.val())
-            this.screen.update({ layers })
+        this.handle = new CanvasHandle(canvas)
+        this.movement = new MouseMovement(this.$el, {
+            scale: new Reactive(1)
         })
-        this.layers.attach(this.layersEff)
-
-        const size = new Size(width, height)
-        this.screen.update({ size })
-
-        this.move = new MouseMovement(this.$el, { scale: this.scale })
-        this.move.getNow = () => this.screen.offset
-        this.move.move = (offset) => {
-            this.screen.update({ offset })
+        this.movement.getNow = () => screen.move.val().offset
+        this.movement.move = (pos) => {
+            screen.move.set(new Move(pos))
         }
 
-        WorkWindow.map.set(this.$el, this)
         WorkWindow.ro.observe(this.$el)
+
+        screen.size.attach(this)
+        screen.transform.attach(this)
+        layerScreenList.attach(this)
+
+        this.update()
     }
 
-    reset() {
-        const { width, height } = this.$el.getBoundingClientRect()
-        const scale = this.scale.val()
-        const size = new Size(width * scale, height * scale)
-        this.screen.update({ size })
+
+    @asyncEmit
+    emit(r: Ref<Size> | Ref<Matrix3x3> | Ref<Ref<PartLayerScreen>[]>) {
+        this.handle.clear()
+        if (r === screen.size) {
+            this.handle.resize(screen.size.val())
+        }
+        this.update()
+    }
+
+    update() {
+        console.log('update')
+        this.handle.clear()
+        this.handle.transform(screen.transform.val())
+        this.handle.rect(
+            new Pos(-100, 100),
+            new Size(200, 200),
+            { fill: false }
+        )
+        this.handle.transform(false)
+
+        layerScreenList.val().forEach(layerScreen => {
+            this.handle.img(layerScreen.val().canvas, new Pos(0))
+        });
     }
 
     destroy() {
         super.destroy()
         WorkWindow.ro.unobserve(this.$el)
-        this.scale.detach(this.scaleEff)
-        this.layers.detach(this.layersEff)
+        screen.size.detach(this)
+        screen.transform.detach(this)
+        layerScreenList.detach(this)
     }
 }
-class CanvasPos extends Pos { _ = 'canvas' }
 
 class CanvasHandle {
     size = new Size(100, 100)
@@ -96,22 +95,32 @@ class CanvasHandle {
     canvas: HTMLCanvasElement = null as any
     ctx: CanvasRenderingContext2D = null as any
 
-    constructor(canvas: HTMLCanvasElement,) {
+    constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
         const ctx = this.canvas.getContext('2d')
         if (!ctx) throw new Error('canvas error!!!')
         this.ctx = ctx
+
     }
 
-    resetSize({ height, width }: Size) {
+    private pos(pos: Pos) {
+        const x = pos.x
+        const y = - pos.y
+        return new Pos(x, y)
+    }
+
+    resize({ height, width }: Size) {
         this.size = new Size(width, height)
         this.canvas.height = height
         this.canvas.width = width
-        this.canvas.style.height = '100%'
-        this.canvas.style.width = '100%'
     }
-
-    line(begin: CanvasPos, end: CanvasPos,
+    transform(mat: Matrix3x3 | false) {
+        if (mat)
+            this.ctx.setTransform(...mat.trans())
+        else
+            this.ctx.resetTransform()
+    }
+    line(begin: Pos, end: Pos,
         { width, color }: {
             width?: number,
             color?: string
@@ -124,53 +133,30 @@ class CanvasHandle {
         this.ctx.lineWidth = width || 1
         this.ctx.stroke()
     }
-
-    rect(pos: CanvasPos, size: Size,
+    rect(pos: Pos, size: Size,
         { fill = true }: { fill?: boolean } = {}
     ) {
+        const p = this.pos(pos)
+
         if (fill) {
-            this.ctx.fillRect(pos.x, pos.y, size.width, size.height)
+            this.ctx.fillRect(p.x, p.y, size.width, size.height)
         } else {
-            this.ctx.strokeRect(pos.x, pos.y, size.width, size.height)
+            this.ctx.strokeRect(p.x, p.y, size.width, size.height)
         }
     }
     img(img: CanvasImageSource, pos: Pos) {
         this.ctx.drawImage(img, pos.x, pos.y)
     }
-
     clear() {
-        this.ctx.clearRect(0, 0, this.size.width, this.size.height)
+        this.ctx.resetTransform()
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
-
-
 }
-class Screen implements Watcher<Ref<Layer>[]>{
-
-    private handle : CanvasHandle
-    constructor(handle:CanvasHandle){
-        this.handle = handle
-        this.layers.attach(this)
+style({
+    '.mouse-move': {
+        'cursor': 'move'
     }
-    private layers = layerScreenList
-    private update(){
-        const layers = this.layers.val().map(v=>v.val())
-
-        this.handle.clear()
-        layers.forEach(v=>{
-            this.handle.img(v.screen,new Pos(0))
-        })
-    }
-
-    async emit(){
-        await nextTick()
-        this.update()
-    }
-
-    destroy(){
-        this.layers.detach(this)
-    }
-
-}
+})
 class MouseMovement {
 
     el: HTMLElement
@@ -213,8 +199,7 @@ class MouseMovement {
     move: (p: Pos) => void = () => { }
     getNow: () => Pos = () => new Pos(0, 0)
 }
-style({
-    '.mouse-move': {
-        'cursor': 'move'
-    }
-})
+
+
+
+export const workWindow = new WorkWindow()

@@ -41,7 +41,6 @@ export class View {
 }
 
 
-
 export const css = <T extends {new(...args: any[]): any}>(selector: string, el: (el: HTMLElement) => void, styleOp: StyleOp) => (constractor: T) : T=> {
 
     style(styleOp, selector)
@@ -55,13 +54,3 @@ export const css = <T extends {new(...args: any[]): any}>(selector: string, el: 
         }
     }
 }
-
-type IsExtends<S, T> = S extends T ? 1 : 2
-
-type A = { new(...args: any[]): any }
-
-type C = { new(...args: any[]): any, [key:string]:any}
-
-type T = { new(...args: any[]): any, ro: any }
-
-type M = IsExtends<T,C>

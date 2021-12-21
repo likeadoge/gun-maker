@@ -4,7 +4,6 @@ export interface Watcher<T> {
     emit: (r: Reactive<T>, old: T) => void
     destroy: () => void
 }
-
 export abstract class Ref<T> {
     abstract val(): T
     abstract attach(w: Watcher<T>): void
@@ -21,19 +20,18 @@ export abstract class Ref<T> {
     }
 
 
-    
+
     protected parents: Mut<any>[] = []
 
-    public parent(t:Mut<any>):this{
+    public parent(t: Mut<any>): this {
         this.parents.push(t)
         return this
     }
 
-    protected emitParents(){
-        this.parents.forEach(element => {element.set(element.val())});
+    protected emitParents() {
+        this.parents.forEach(element => { element.set(element.val()) });
     }
 }
-
 export abstract class Mut<T> extends Ref<T> {
     abstract set(t: T): void
     abstract update(fn: (t: T) => T): void
@@ -47,7 +45,6 @@ export abstract class Mut<T> extends Ref<T> {
     }
 
 }
-
 export class Reactive<T> extends Mut<T>{
     #val: T
     #watchers: Watcher<T>[] = []
@@ -82,7 +79,6 @@ export class Reactive<T> extends Mut<T>{
         this.#watchers = this.#watchers.filter(v => v != watcher)
     }
 }
-
 export class Computed<S extends any[], T> extends Ref<T> implements Watcher<unknown>{
 
     #target: Reactive<T>
@@ -114,7 +110,6 @@ export class Computed<S extends any[], T> extends Ref<T> implements Watcher<unkn
     attach(w: Watcher<T>) { return this.#target.attach(w) }
     detach(w: Watcher<T>) { return this.#target.detach(w) }
 }
-
 export class Transform<S extends any[], T> extends Mut<T> implements Watcher<unknown>{
 
     #target: Reactive<T>
@@ -152,7 +147,6 @@ export class Transform<S extends any[], T> extends Mut<T> implements Watcher<unk
     set(v: T) { this.#updateFn(v, ...this.#argus) }
     update(fn: (t: T) => T) { this.set(fn(this.#target.val())) }
 }
-
 export class Effect<T> implements Watcher<T>{
     #target: Ref<T> | null = null
     #fn = (t: T) => { }
@@ -176,7 +170,32 @@ export class Effect<T> implements Watcher<T>{
         this.#target?.detach(this)
     }
 }
-
 export type MayRef<T> = T | Ref<T>
 
 export type MayMut<T> = T | Mut<T>
+
+// 方法装饰器
+const asyncEmitWeakmap = new WeakMap<{}, number>()
+const clearAsyncEmit = (s: any) => {
+    const above = asyncEmitWeakmap.get(s)
+    if (above) { clearTimeout(above) }
+}
+
+export function asyncEmit(
+    target: Watcher<any>,
+    key: 'emit',
+    descriptor: PropertyDescriptor
+) {
+    const old = descriptor.value
+    descriptor.value = function (...argus: any[]) {
+        clearAsyncEmit(this)
+        const emit = () => {
+            clearAsyncEmit(this)
+            return old.call(this,...argus)
+        }
+        const num = setTimeout(emit, 0) as unknown as number
+        asyncEmitWeakmap.set(this, num)
+    }
+
+    return descriptor
+}
