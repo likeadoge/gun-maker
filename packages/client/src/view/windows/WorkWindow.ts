@@ -1,10 +1,12 @@
 
-import { Part, layerScreenList, PartLayerScreen } from "@/model/Part";
-import { asyncEmit, Effect, Mut, Reactive, Ref, Watcher } from "@/reactive/base";
-import { Matrix3x3, nextTick, Pos, Size, style } from "@/utils";
+import { asyncEmit, Reactive, Ref, Watcher } from "@/reactive/base";
+import { Matrix3x3, Pos, Size } from "@/utils";
 import { css, View } from "@/utils/view";
-import { LayerScreen, screen } from "@/model/Screen"
-import { Move, Scale } from "@/model/Transform";
+import { LayerScreen, screen, } from "@/model/Screen"
+import {layerScreenList} from '@/model/Layer'
+import { Move } from "@/model/Transform";
+import { style } from "@/utils/style";
+import { CanvasHandle } from "@/utils/canvas";
 
 @css<typeof WorkWindow>('.work-window', v => v.classList.add('work-window'), {
     '&': {
@@ -18,7 +20,8 @@ import { Move, Scale } from "@/model/Transform";
         'width': '100%',
     }
 })
-export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3>, Watcher<Ref<PartLayerScreen>[]>{
+
+export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3>, Watcher<Ref<LayerScreen>[]>{
 
     static ro = new ResizeObserver(entries => {
         for (let entry of entries) {
@@ -27,8 +30,9 @@ export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3
         }
     })
 
-    handle: CanvasHandle
+    handle: CanvasHandle<HTMLCanvasElement>
     movement: MouseMovement
+
 
     constructor() {
         const $el = document.createElement('div')
@@ -56,7 +60,7 @@ export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3
 
 
     @asyncEmit
-    emit(r: Ref<Size> | Ref<Matrix3x3> | Ref<Ref<PartLayerScreen>[]>) {
+    emit(r: Ref<Size> | Ref<Matrix3x3> | Ref<Ref<LayerScreen>[]>) {
         this.handle.clear()
         if (r === screen.size) {
             this.handle.resize(screen.size.val())
@@ -67,16 +71,10 @@ export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3
     update() {
         console.log('update')
         this.handle.clear()
-        this.handle.transform(screen.transform.val())
-        this.handle.rect(
-            new Pos(-100, 100),
-            new Size(200, 200),
-            { fill: false }
-        )
-        this.handle.transform(false)
+        this.handle.transform(null)
 
         layerScreenList.val().forEach(layerScreen => {
-            this.handle.img(layerScreen.val().canvas, new Pos(0))
+            this.handle.source(layerScreen.val().canvas, new Pos(0))
         });
     }
 
@@ -89,69 +87,69 @@ export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3
     }
 }
 
-class CanvasHandle {
-    size = new Size(100, 100)
+// class CanvasHandle {
+//     size = new Size(100, 100)
 
-    canvas: HTMLCanvasElement = null as any
-    ctx: CanvasRenderingContext2D = null as any
+//     canvas: HTMLCanvasElement = null as any
+//     ctx: CanvasRenderingContext2D = null as any
 
-    constructor(canvas: HTMLCanvasElement) {
-        this.canvas = canvas
-        const ctx = this.canvas.getContext('2d')
-        if (!ctx) throw new Error('canvas error!!!')
-        this.ctx = ctx
+//     constructor(canvas: HTMLCanvasElement) {
+//         this.canvas = canvas
+//         const ctx = this.canvas.getContext('2d')
+//         if (!ctx) throw new Error('canvas error!!!')
+//         this.ctx = ctx
 
-    }
+//     }
 
-    private pos(pos: Pos) {
-        const x = pos.x
-        const y = - pos.y
-        return new Pos(x, y)
-    }
+//     private pos(pos: Pos) {
+//         const x = pos.x
+//         const y = - pos.y
+//         return new Pos(x, y)
+//     }
 
-    resize({ height, width }: Size) {
-        this.size = new Size(width, height)
-        this.canvas.height = height
-        this.canvas.width = width
-    }
-    transform(mat: Matrix3x3 | false) {
-        if (mat)
-            this.ctx.setTransform(...mat.trans())
-        else
-            this.ctx.resetTransform()
-    }
-    line(begin: Pos, end: Pos,
-        { width, color }: {
-            width?: number,
-            color?: string
-        } = {}
-    ) {
-        this.ctx.beginPath()
-        this.ctx.moveTo(begin.x, begin.y)
-        this.ctx.lineTo(end.x, end.y)
-        this.ctx.strokeStyle = color || '#ccc'
-        this.ctx.lineWidth = width || 1
-        this.ctx.stroke()
-    }
-    rect(pos: Pos, size: Size,
-        { fill = true }: { fill?: boolean } = {}
-    ) {
-        const p = this.pos(pos)
+//     resize({ height, width }: Size) {
+//         this.size = new Size(width, height)
+//         this.canvas.height = height
+//         this.canvas.width = width
+//     }
+//     transform(mat: Matrix3x3 | false) {
+//         if (mat)
+//             this.ctx.setTransform(...mat.trans())
+//         else
+//             this.ctx.resetTransform()
+//     }
+//     line(begin: Pos, end: Pos,
+//         { width, color }: {
+//             width?: number,
+//             color?: string
+//         } = {}
+//     ) {
+//         this.ctx.beginPath()
+//         this.ctx.moveTo(begin.x, begin.y)
+//         this.ctx.lineTo(end.x, end.y)
+//         this.ctx.strokeStyle = color || '#ccc'
+//         this.ctx.lineWidth = width || 1
+//         this.ctx.stroke()
+//     }
+//     rect(pos: Pos, size: Size,
+//         { fill = true }: { fill?: boolean } = {}
+//     ) {
+//         const p = this.pos(pos)
 
-        if (fill) {
-            this.ctx.fillRect(p.x, p.y, size.width, size.height)
-        } else {
-            this.ctx.strokeRect(p.x, p.y, size.width, size.height)
-        }
-    }
-    img(img: CanvasImageSource, pos: Pos) {
-        this.ctx.drawImage(img, pos.x, pos.y)
-    }
-    clear() {
-        this.ctx.resetTransform()
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-    }
-}
+//         if (fill) {
+//             this.ctx.fillRect(p.x, p.y, size.width, size.height)
+//         } else {
+//             this.ctx.strokeRect(p.x, p.y, size.width, size.height)
+//         }
+//     }
+//     img(img: CanvasImageSource, pos: Pos) {
+//         this.ctx.drawImage(img, pos.x, pos.y)
+//     }
+//     clear() {
+//         this.ctx.resetTransform()
+//         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+//     }
+// }
 style({
     '.mouse-move': {
         'cursor': 'move'

@@ -58,7 +58,7 @@ export class Rotate extends Transfrom {
         this.angle = angel
     }
 
-    matrix(o: Pos) {
+    matrix() {
         const sin = Math.sin(this.angle)
         const cos = Math.cos(this.angle)
 

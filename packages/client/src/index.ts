@@ -1,8 +1,9 @@
 import './icon.js'
 
-import { complete, style } from "./utils";
+import { complete } from "./utils";
 
 import { initView } from '@/view'
+import { style } from './utils/style';
 
 
 style({

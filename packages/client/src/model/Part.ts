@@ -3,10 +3,7 @@ import { Matrix3x3, Pos, Size } from "@/utils"
 import { Img } from "./Image"
 import { Move, Scale, Transfrom } from "./Transform"
 import { CacheList } from "@/reactive/cache"
-import { LayerScreen, screen } from "./Screen"
-
-
-
+import { LayerScreen, screen } from "@/model/Screen"
 
 export class Part {
     image: Img
@@ -33,7 +30,6 @@ export class Part {
         ))
     }
 }
-
 export class PartLayerScreen extends LayerScreen implements Watcher<Part>{
     part: Ref<Part>
     constructor(part: Ref<Part>) {
@@ -63,8 +59,5 @@ export class PartLayerScreen extends LayerScreen implements Watcher<Part>{
 
 }
 
-export const layerList: Mut<Mut<Part>[]> = new Reactive<Mut<Part>[]>([])
+export const partLayers: Mut<Mut<Part>[]> = new Reactive<Mut<Part>[]>([])
 
-export const layerScreenList = new CacheList<Mut<Part>, Ref<PartLayerScreen>>(layerList, (layer) => layer
-    .compute(layer => new PartLayerScreen(layer))
-)

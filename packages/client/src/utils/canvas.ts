@@ -26,8 +26,29 @@ export class CanvasHandle<T extends CanvasLike> {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     }
 
+    private pos(pos: Pos) {
+        const x = pos.x
+        const y = - pos.y
+        return new Pos(x, y)
+    }
+
+
+    rect(pos: Pos, size: Size,
+        { fill = true }: { fill?: boolean } = {}
+    ) {
+        const p = this.pos(pos)
+
+        if (fill) {
+            this.ctx.fillRect(p.x, p.y, size.width, size.height)
+        } else {
+            this.ctx.strokeRect(p.x, p.y, size.width, size.height)
+        }
+    }
     img(image: Img, p: Pos) {
         this.ctx.drawImage(image.target, p.x, p.y,)
+    }
+    source(source: CanvasImageSource, p: Pos) {
+        this.ctx.drawImage(source, p.x, p.y)
     }
 
     transform(m: Matrix3x3 | null) {

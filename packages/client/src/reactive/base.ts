@@ -1,13 +1,16 @@
 // import { Head, Tail } from "@/types"
 
-export interface Watcher<T> {
+
+
+
+export interface Watcher<T > {
     emit: (r: Reactive<T>, old: T) => void
     destroy: () => void
 }
 export abstract class Ref<T> {
     abstract val(): T
-    abstract attach(w: Watcher<T>): void
-    abstract detach(w: Watcher<T>): void
+    abstract attach<S extends  Watcher<T>>(w: S): void
+    abstract detach<S extends  Watcher<T>>(w: S): void
 
 
 

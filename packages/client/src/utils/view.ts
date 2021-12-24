@@ -1,4 +1,4 @@
-import { style, StyleOp } from "@/utils"
+import { style, StyleOp } from "@/utils/style"
 
 export class View {
     $el: HTMLElement

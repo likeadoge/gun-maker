@@ -3,7 +3,7 @@ import { BtnGroup, ToggleBtn, SliderBtn } from "@/components/Btn"
 import { FlexCol, FlexFill, FlexFixed, FlexRow } from "@/components/Flex"
 import { Icon } from "@/components/Icon"
 import { Img } from "@/model/Image"
-import { Part, layerList } from "@/model/Part"
+import { Part, partLayers } from "@/model/Part"
 import { Reactive, Ref } from "@/reactive/base"
 import { shadow } from "@/style"
 import { screen } from "@/model/Screen"
@@ -92,7 +92,7 @@ Promise.all([img0.done, img1.done, img2.done]).then(() => {
     // l1.transforms = [new Move(new Pos(100))]
     l0.transforms = [new Rotate(new Pos(100), Math.PI / 6)]
     console.log('img')
-    layerList.set([
+    partLayers.set([
         new Reactive(l0),
         new Reactive(l1),
         // new Reactive(l2)
