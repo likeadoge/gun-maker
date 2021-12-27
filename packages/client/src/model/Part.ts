@@ -1,9 +1,9 @@
-import { Computed, Effect, Mut, Reactive, Ref, Watcher } from "@/reactive/base"
-import { Matrix3x3, Pos, Size } from "@/utils"
+import {  Mut, Reactive, Ref, Watcher } from "@/reactive/base"
+import { Matrix3x3, Pos } from "@/utils"
 import { Img } from "./Image"
-import { Move, Scale, Transfrom } from "./Transform"
-import { CacheList } from "@/reactive/cache"
-import { LayerScreen, screen } from "@/model/Screen"
+import { Transfrom } from "./Transform"
+import { LayerScreen,  } from "@/model/Screen"
+import { LayerPreview } from "./Preview"
 
 export class Part {
     image: Img
@@ -56,8 +56,37 @@ export class PartLayerScreen extends LayerScreen implements Watcher<Part>{
         super.destroy()
         this.part.detach(this)
     }
+}
+
+export class PartLayerPreview extends LayerPreview implements Watcher<Part>{
+    part: Ref<Part>
+    constructor(part: Ref<Part>) {
+        super()
+        this.part = part
+        this.part.attach(this)
+        this.update()
+    }
+
+    update() {
+        this.transform(
+            this.part.val()
+                .matrix()
+                .mul(this.getScreenTransfrom())
+        )
+
+        this._ctx().globalAlpha = 0.2
+
+        this.img(this.part.val().image, this.part.val().origin.trans(v => -v))
+
+    }
+
+    destroy() {
+        super.destroy()
+        this.part.detach(this)
+    }
 
 }
+
 
 export const partLayers: Mut<Mut<Part>[]> = new Reactive<Mut<Part>[]>([])
 

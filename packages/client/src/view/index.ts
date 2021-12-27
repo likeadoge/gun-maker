@@ -11,6 +11,7 @@ import { LayerList } from "./windows/LayerList"
 import { Move, Rotate, Scale } from "@/model/Transform"
 import { Pos } from "@/utils"
 import { workWindow } from "./windows/WorkWindow"
+import { previewWindow } from "./windows/PreviewWindow"
 
 export const initView = () => {
     new App()
@@ -32,7 +33,8 @@ export const initView = () => {
                                 .child(
                                     new FlexFixed()
                                         .style(v => v.width = "300px")
-                                    // .child(new LayerList(globe.layers as unknown as Ref<Ref<Layer>[]>))
+                                        .css({ margin: '12px 12px 12px 0' })
+                                        .child(previewWindow)
                                 )
                         )
                 )
@@ -86,16 +88,12 @@ Promise.all([img0.done, img1.done, img2.done]).then(() => {
 
     const l0 = new Part(img1)
     const l1 = new Part(img1)
-    // const l1 = new Layer(img1)
-    // const l2 = new Layer(img2)
 
-    // l1.transforms = [new Move(new Pos(100))]
     l0.transforms = [new Rotate(new Pos(100), Math.PI / 6)]
     console.log('img')
     partLayers.set([
         new Reactive(l0),
         new Reactive(l1),
-        // new Reactive(l2)
     ])
 
 

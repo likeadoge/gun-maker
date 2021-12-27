@@ -1,6 +1,7 @@
 import { Mut, Ref } from "@/reactive/base"
 import { CacheList } from "@/reactive/cache"
-import { Part, partLayers, PartLayerScreen } from "./Part"
+import { Part, PartLayerPreview, partLayers, PartLayerScreen } from "./Part"
+import { LayerPreview } from "./Preview"
 import { LayerScreen } from "./Screen"
 import { sightLayerScreen } from "./Sight"
 
@@ -12,5 +13,8 @@ export const layerScreenList = new CacheList<Mut<Part>, Ref<LayerScreen>>(partLa
 })
 
 
-// export const layerPreview = new 
+export const layerPreviewList = new CacheList<Mut<Part>, Ref<LayerPreview>>(partLayers, (layer) => layer
+.compute(layer => new PartLayerPreview(layer))
+)
+
 

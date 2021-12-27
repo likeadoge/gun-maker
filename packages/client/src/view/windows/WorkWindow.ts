@@ -87,69 +87,6 @@ export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3
     }
 }
 
-// class CanvasHandle {
-//     size = new Size(100, 100)
-
-//     canvas: HTMLCanvasElement = null as any
-//     ctx: CanvasRenderingContext2D = null as any
-
-//     constructor(canvas: HTMLCanvasElement) {
-//         this.canvas = canvas
-//         const ctx = this.canvas.getContext('2d')
-//         if (!ctx) throw new Error('canvas error!!!')
-//         this.ctx = ctx
-
-//     }
-
-//     private pos(pos: Pos) {
-//         const x = pos.x
-//         const y = - pos.y
-//         return new Pos(x, y)
-//     }
-
-//     resize({ height, width }: Size) {
-//         this.size = new Size(width, height)
-//         this.canvas.height = height
-//         this.canvas.width = width
-//     }
-//     transform(mat: Matrix3x3 | false) {
-//         if (mat)
-//             this.ctx.setTransform(...mat.trans())
-//         else
-//             this.ctx.resetTransform()
-//     }
-//     line(begin: Pos, end: Pos,
-//         { width, color }: {
-//             width?: number,
-//             color?: string
-//         } = {}
-//     ) {
-//         this.ctx.beginPath()
-//         this.ctx.moveTo(begin.x, begin.y)
-//         this.ctx.lineTo(end.x, end.y)
-//         this.ctx.strokeStyle = color || '#ccc'
-//         this.ctx.lineWidth = width || 1
-//         this.ctx.stroke()
-//     }
-//     rect(pos: Pos, size: Size,
-//         { fill = true }: { fill?: boolean } = {}
-//     ) {
-//         const p = this.pos(pos)
-
-//         if (fill) {
-//             this.ctx.fillRect(p.x, p.y, size.width, size.height)
-//         } else {
-//             this.ctx.strokeRect(p.x, p.y, size.width, size.height)
-//         }
-//     }
-//     img(img: CanvasImageSource, pos: Pos) {
-//         this.ctx.drawImage(img, pos.x, pos.y)
-//     }
-//     clear() {
-//         this.ctx.resetTransform()
-//         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-//     }
-// }
 style({
     '.mouse-move': {
         'cursor': 'move'

@@ -22,6 +22,10 @@ export class Move extends Transfrom {
             0, 0, 1
         )
     }
+
+    inverse() {
+        return new Move(this.offset.trans(v => -v))
+    }
 }
 
 export class Scale extends Transfrom {
@@ -45,6 +49,11 @@ export class Scale extends Transfrom {
         const step2 = new Move(this.origin.trans(n => n)).matrix()
 
         return step0.mul(step1).mul(step2)
+    }
+
+
+    inverse() {
+        return new Scale(this.origin, this.ratio.trans(v => 1 / v))
     }
 }
 
@@ -73,5 +82,9 @@ export class Rotate extends Transfrom {
         const step2 = new Move(this.origin.trans(n => n)).matrix()
 
         return step0.mul(step1).mul(step2)
+    }
+
+    inverse() {
+        return new Rotate(this.origin, -1 *this.angle)
     }
 }
