@@ -5,5 +5,11 @@
   "license": "MIT",
   "devDependencies": {
     "lerna": "^4.0.0"
+  },
+  "scripts": {
+    "dev": "cd ./packages/client && npx vite",
+    "test": "cd ./packages/client && npx jest",
+    "test-c": "cd ./packages/client && npx jest --coverage",
+    "build": "cd ./packages/client && npx tsc && npx vite build"
   }
 }

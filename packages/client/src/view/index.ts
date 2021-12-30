@@ -1,17 +1,15 @@
 import { App } from "@/components/App"
-import { BtnGroup, ToggleBtn, SliderBtn } from "@/components/Btn"
+import { BtnGroup, SliderBtn } from "@/components/Btn"
 import { FlexCol, FlexFill, FlexFixed, FlexRow } from "@/components/Flex"
-import { Icon } from "@/components/Icon"
 import { Img } from "@/model/Image"
 import { Part, partLayers } from "@/model/Part"
-import { Reactive, Ref } from "@/reactive/base"
+import { Reactive } from "@/reactive/base"
 import { shadow } from "@/style"
 import { screen } from "@/model/Screen"
-import { LayerList } from "./windows/LayerList"
-import { Move, Rotate, Scale } from "@/model/Transform"
-import { Pos } from "@/utils"
-import { workWindow } from "./windows/WorkWindow"
-import { previewWindow } from "./windows/PreviewWindow"
+import { Rotate, Scale } from "@/utils/coordinate"
+import { Pos } from "@/utils/coordinate"
+import { workWindow } from "./window/WorkWindow"
+import { previewWindow } from "./window/PreviewWindow"
 
 export const initView = () => {
     new App()

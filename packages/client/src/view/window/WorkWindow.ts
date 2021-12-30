@@ -1,12 +1,13 @@
-
-import { asyncEmit, Reactive, Ref, Watcher } from "@/reactive/base";
-import { Matrix3x3, Pos, Size } from "@/utils";
-import { css, View } from "@/utils/view";
-import { LayerScreen, screen, } from "@/model/Screen"
-import {layerScreenList} from '@/model/Layer'
-import { Move } from "@/model/Transform";
-import { style } from "@/utils/style";
+import { layerScreenList } from "@/model/Layer";
+import { LayerScreen } from "@/model/Screen";
+import { Watcher, Ref, Reactive, asyncEmit } from "@/reactive/base";
+import { Size } from "@/utils";
+import { screen } from "@/model/Screen"
 import { CanvasHandle } from "@/utils/canvas";
+import { Matrix3x3, Move, Pos } from "@/utils/coordinate";
+import { style } from "@/utils/style";
+import { css, View } from "@/utils/view";
+
 
 @css<typeof WorkWindow>('.work-window', v => v.classList.add('work-window'), {
     '&': {
@@ -42,7 +43,7 @@ export class WorkWindow extends View implements Watcher<Size>, Watcher<Matrix3x3
 
         this.handle = new CanvasHandle(canvas)
         this.movement = new MouseMovement(this.$el, {
-            scale: new Reactive(1)
+            scale: screen.scale.compute(v=>v.val().ratio.x)
         })
         this.movement.getNow = () => screen.move.val().offset
         this.movement.move = (pos) => {
@@ -115,8 +116,8 @@ class MouseMovement {
                 else if (this.from === 'start')
                     this.from = new Pos(e.clientX, e.clientY)
                 else {
-                    const x = (e.clientX - this.from.x) * this.scale.val()
-                    const y = -(e.clientY - this.from.y) * this.scale.val()
+                    const x = (e.clientX - this.from.x) / this.scale.val()
+                    const y = -(e.clientY - this.from.y) / this.scale.val()
                     this.move(this.now.trans(_ => x + _, _ => y + _))
                 }
             }

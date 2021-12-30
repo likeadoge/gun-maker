@@ -1,6 +1,6 @@
-import { Img } from "@/model/Image"
-import { Size } from "."
-import { Matrix3x3, Pos} from "./coordinate"
+import { Img } from "./image"
+import { Size } from "./position"
+import { Matrix3x3, Pos } from "./coordinate"
 
 type CanvasLike = HTMLCanvasElement | OffscreenCanvas
 type CanvasCtx<T extends CanvasLike> = T extends HTMLCanvasElement
@@ -33,7 +33,6 @@ export class CanvasHandle<T extends CanvasLike> {
         return new Pos(x, y)
     }
 
-
     rect(pos: Pos, size: Size,
         { fill = true }: { fill?: boolean } = {}
     ) {
@@ -51,12 +50,13 @@ export class CanvasHandle<T extends CanvasLike> {
     source(source: CanvasImageSource, p: Pos) {
         this.ctx.drawImage(source, p.x, p.y)
     }
-
     transform(m: Matrix3x3 | null) {
         if (!m)
             this.ctx.resetTransform()
-        else
-            this.ctx.setTransform(...m.trans())
+        else {
+            const [x0, x1, x2, x3, x4, x5] = m.val
+            this.ctx.setTransform(x0, x1, x2, x3, x4, x5)
+        }
     }
 
 }

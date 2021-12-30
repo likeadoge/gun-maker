@@ -39,8 +39,6 @@ export class LayerList extends View implements Watcher<LayerItem[]>{
 }
 
 export class LayerItem extends View {
-
-
     title: HTMLElement
     layer: Ref<Part>
 
@@ -52,7 +50,4 @@ export class LayerItem extends View {
         this.title.innerText = this.layer.val().image.src
         this.$el.appendChild(this.title)
     }
-
-
-
 }

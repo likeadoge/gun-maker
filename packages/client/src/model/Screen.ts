@@ -1,9 +1,7 @@
 import { Computed, Mut, Reactive, Ref, Watcher } from "@/reactive/base"
-import { CacheList } from "@/reactive/cache"
-import { Matrix3x3, Pos, Size } from "@/utils"
+import {  Size } from "@/utils"
 import { CanvasHandle } from "@/utils/canvas"
-import { Part, partLayers, PartLayerScreen } from "./Part"
-import { Move, Scale } from "./Transform"
+import { Move, Pos, Scale, Matrix3x3 } from "@/utils/coordinate"
 
 export class Screen {
     size = new Reactive(new Size(100, 100))
@@ -16,7 +14,7 @@ export class Screen {
             const s = scale.val().matrix()
             const m = move.val().matrix()
             const o = new Move(new Pos(size.val().width / 2, - size.val().height / 2)).matrix()
-            return s.mul(m).mul(o)
+            return m.mul(s).mul(o)
         })
     }
 }

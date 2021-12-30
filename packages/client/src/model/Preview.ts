@@ -1,8 +1,8 @@
 import { Ref, Watcher } from "@/reactive/base";
-import { Matrix3x3, Size } from "@/utils";
+import { Matrix3x3 } from "@/utils/coordinate";
 import { CanvasHandle } from "@/utils/canvas";
-import { screen } from './Screen'
 import { sight } from "./Sight";
+import { Size } from "@/utils";
 
 export class PreivewCanvas extends CanvasHandle<HTMLCanvasElement>{
     constructor() {

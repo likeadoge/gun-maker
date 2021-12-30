@@ -1,8 +1,7 @@
-import {  Mut, Reactive, Ref, Watcher } from "@/reactive/base"
-import { Matrix3x3, Pos } from "@/utils"
+import { Mut, Reactive, Ref, Watcher } from "@/reactive/base"
 import { Img } from "./Image"
-import { Transfrom } from "./Transform"
-import { LayerScreen,  } from "@/model/Screen"
+import { Transfrom, Matrix3x3, Pos } from "@/utils/coordinate"
+import { LayerScreen, } from "@/model/Screen"
 import { LayerPreview } from "./Preview"
 
 export class Part {
@@ -57,7 +56,6 @@ export class PartLayerScreen extends LayerScreen implements Watcher<Part>{
         this.part.detach(this)
     }
 }
-
 export class PartLayerPreview extends LayerPreview implements Watcher<Part>{
     part: Ref<Part>
     constructor(part: Ref<Part>) {
@@ -86,7 +84,6 @@ export class PartLayerPreview extends LayerPreview implements Watcher<Part>{
     }
 
 }
-
 
 export const partLayers: Mut<Mut<Part>[]> = new Reactive<Mut<Part>[]>([])
 
