@@ -1,5 +1,5 @@
 
-export type StyleRules = { [name: string]: string } & { $next?: StyleOption }
+export type StyleRules = Partial<CSSStyleDeclaration> & { $next?: StyleOption }
 
 export type StyleOption = { [selector: string]: StyleRules }
 
@@ -15,7 +15,7 @@ export const style = (s: StyleOption, upper: string = '') => {
         ${upper}${sel(selector)} {${Array.from(Object.entries(values))
                 .filter(v => typeof v[1] === 'string')
                 .map(([name, value]) => `
-            ${name}:${value};`).join('')}
+            ${name.replace(/[A-Z]/g, s => '-' + s.toLocaleLowerCase())}:${value};`).join('')}
         }`
         e.innerHTML += html
 

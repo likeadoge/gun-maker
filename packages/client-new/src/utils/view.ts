@@ -1,6 +1,6 @@
 import { style, StyleOption } from "./stylesheet"
 
-export class View<Slots extends string>{
+export class View<Slots extends string = never>{
     $el: HTMLElement
     children: View<string>[] = []
 
@@ -28,20 +28,14 @@ export class View<Slots extends string>{
         return this
     }
 
-    style(fn: (s: CSSStyleDeclaration) => void) {
-        fn(this.$el.style)
+    // style(fn: (s: CSSStyleDeclaration) => void) {
+    //     fn(this.$el.style)
+    //     return this
+    // }
+
+    style(css: Partial<CSSStyleDeclaration>) {
+        Object.assign(this.$el.style,css)
         return this
-    }
-
-    css(css: { [key: string]: string }) {
-
-        Array.from(Object.entries(css)).forEach(([k, val]) => {
-            const key: any = k.replace(/\-[a-z]/g, s => s[1].toUpperCase())
-            this.$el.style[key] = val
-        })
-
-        return this
-
     }
 
     destroy() {
