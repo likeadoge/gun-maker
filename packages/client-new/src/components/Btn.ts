@@ -1,5 +1,5 @@
 import { Effect, Mut } from "@/utils/reactive";
-import { shadow, transition } from "@/style";
+import { shadow, transition } from "@/style/common";
 import { css, View } from '@/utils/view'
 
 
@@ -7,9 +7,9 @@ import { css, View } from '@/utils/view'
     '': {
         'display': 'flex',
         'padding': '6px',
-        'flex-direction': 'row',
-        'justify-content': 'left',
-        'align-items': 'center',
+        'flexDirection': 'row',
+        'justifyContent': 'left',
+        'alignItems': 'center',
     }
 })
 export class BtnGroup extends View {
@@ -49,12 +49,12 @@ export class BtnGroup extends View {
         ...transition(),
         'cursor': 'pointer',
         'margin': '6px',
-        'background-color': '#ff1744',
+        'backgroundColor': '#ff1744',
         'color': '#fff',
         'filter': 'grayscale(100%)',
-        'font-size': '36px',
+        'fontSize': '36px',
         'padding': '3px 6px',
-        'border-radius': '3px',
+        'borderRadius': '3px',
     },
     '&:hover': {
         'opacity': '0.85'
@@ -95,7 +95,7 @@ export class ToggleBtn extends View {
         'content': '""',
         'display': 'block',
         'height': '4px',
-        'border-radius': '2px',
+        'borderRadius': '2px',
         'position': 'relative',
         'background': '#66ccff',
 
@@ -107,7 +107,7 @@ export class ToggleBtn extends View {
         'height': '24px',
         'width': '24px',
         'cursor': 'pointer',
-        'border-radius': '50%',
+        'borderRadius': '50%',
         'background': '#ff1744',
         'transform': 'translateX(-12px)'
     },

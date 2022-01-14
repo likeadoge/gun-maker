@@ -24,10 +24,10 @@ export class View {
         return this
     }
 
-    css(css:{[key:string]:string}){
+    css(css: { [key: string]: string }) {
 
-        Array.from(Object.entries(css)).forEach(([k,val])=>{
-            const key :any= k.replace(/\-[a-z]/g, s => s[1].toUpperCase())
+        Array.from(Object.entries(css)).forEach(([k, val]) => {
+            const key: any = k.replace(/\-[a-z]/g, s => s[1].toUpperCase())
             this.$el.style[key] = val
         })
 
@@ -40,8 +40,7 @@ export class View {
     }
 }
 
-
-export const css = <T extends {new(...args: any[]): any}>(selector: string, el: (el: HTMLElement) => void, styleOp: StyleOp) => (constractor: T) : T=> {
+export const css = <T extends { new(...args: any[]): any }>(selector: string, el: (el: HTMLElement) => void, styleOp: StyleOp) => (constractor: T): T => {
 
     style(styleOp, selector)
 

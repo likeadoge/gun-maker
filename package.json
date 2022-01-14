@@ -11,5 +11,8 @@
     "test": "cd ./packages/client && npx jest",
     "test-c": "cd ./packages/client && npx jest --coverage",
     "build": "cd ./packages/client && npx tsc && npx vite build"
+  },
+  "dependencies": {
+    "query-string": "^7.1.0"
   }
 }
