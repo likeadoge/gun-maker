@@ -12,9 +12,9 @@ import { css, View } from '@/utils/view'
     }
 })
 export class Icon extends View {
-    $el = document.createElement('i')
+    $root = document.createElement('i')
     constructor(name: string) {
         super()
-        this.$el.innerHTML = `<svg aria-hidden="true" class="icon"><use xlink:href="#icon-${name}"></use></svg>`
+        this.$root.innerHTML = `<svg aria-hidden="true" class="icon"><use xlink:href="#icon-${name}"></use></svg>`
     }
 }

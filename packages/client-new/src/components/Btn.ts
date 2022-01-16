@@ -73,8 +73,8 @@ export class ToggleBtn extends View {
     constructor(status: Mut<boolean>) {
         super()
         this.status = status
-        this.$el.onclick = () => this.status.update(!this.status.val())
-        this.effect = new Effect(v => this.$el.classList[v ? 'add' : 'remove']('selected'))
+        this.$root.onclick = () => this.status.update(!this.status.val())
+        this.effect = new Effect(v => this.$root.classList[v ? 'add' : 'remove']('selected'))
         this.status.attach(this.effect)
     }
 
@@ -125,8 +125,8 @@ export class SliderBtn extends View {
             this.slider.style.left = v * 100 + '%'
         })
         this.slider = document.createElement('div')
-        this.$el.appendChild(this.slider)
-        this.move = new SliderMovement(this.$el, this.slider)
+        this.$root.appendChild(this.slider)
+        this.move = new SliderMovement(this.$root, this.slider)
         this.status.attach(this.effect)
 
         this.move.getNow = () => this.status.val()

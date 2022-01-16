@@ -1,19 +1,17 @@
+import { div, id } from '@/utils/dom';
 import { css, View } from '@/utils/view'
 import { MainLayout } from './layout';
 
 
-@css('#app',el => { el.id = 'app'; return '#app' }, {
-    '': {
+@css({
+    '&': {
         'background': "#ccc",
         'minWidth': '800px',
         'height': '100%'
     }
 })
 export class App extends View {
-    constructor(){
-        super(( document.querySelector('#app') as HTMLElement )|| document.createElement('div'))
-    }
-    created(){
-        this.append(new MainLayout())
+    protected created(): void | Promise<void> {
+        this.setRoot([div,id('app'),[new MainLayout()]])
     }
 }

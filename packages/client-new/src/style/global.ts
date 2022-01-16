@@ -1,7 +1,7 @@
 
-import { style } from '@/utils/stylesheet';
+import { stylesheet } from '@/utils/stylesheet';
 
-style({
+stylesheet({
     'html,body': {
         'margin': '0',
         'padding': '0',
