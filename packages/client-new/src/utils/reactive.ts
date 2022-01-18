@@ -245,3 +245,6 @@ export class CacheList<S, T> extends Ref<T[]> implements Watcher<S[]>{
     detach(w: Watcher<T[]>) { return this.#target.detach(w) }
 
 }
+
+
+export const rtive = <T>(v:T)=> new Reactive(v)

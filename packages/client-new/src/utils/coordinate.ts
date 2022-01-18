@@ -1,5 +1,5 @@
 
-export class Pos {
+export class Point {
     x: number = 0 // left
     y: number = 0 // top
 
@@ -60,19 +60,16 @@ export class Matrix3x3 {
         return this
     }
 
-    transfrom(pos:Pos){
-        const x = pos.x
-    }
 }
 
 export abstract class Transfrom {
-    abstract matrix(res: Matrix3x3): Matrix3x3
+    abstract matrix(res?: Matrix3x3): Matrix3x3
 }
 
 export class Move extends Transfrom {
-    offset = new Pos(0, 0)
+    offset = new Point(0, 0)
 
-    constructor(pos: Pos) {
+    constructor(pos: Point) {
         super()
         this.offset = pos
     }
@@ -91,10 +88,10 @@ export class Move extends Transfrom {
 }
 
 export class Scale extends Transfrom {
-    ratio = new Pos(0, 0)
+    ratio = new Point(0, 0)
 
 
-    constructor(ratio: Pos) {
+    constructor(ratio: Point) {
         super()
         this.ratio = ratio
     }
@@ -123,7 +120,7 @@ export class Rotate extends Transfrom {
     }
 
     matrix(res: Matrix3x3 = new Matrix3x3()) {
-        
+
         const sin = Math.sin(this.angle)
         const cos = Math.cos(this.angle)
 
@@ -149,15 +146,21 @@ export class XoY {
         return new XoY(xoy)
     }
 
-    constructor(base: (Symbol|XoY) = Symbol()) {
+    constructor(base: (Symbol | XoY) = Symbol()) {
         this.base = base
     }
 
     update(t: (Scale | Move)[]) {
         this.transfroms = t
         return this
-    } 
-    getTransfroms(){
+    }
+    getTransfroms() {
         return this.transfroms
     }
 }
+
+
+export const point = (x: number, y: number = x) => new Point(x, y)
+export const move = (p:Point) => new Move(p)
+export const scale = (p:Point) => new Scale(p)
+export const rotate = (p:number) => new Rotate(p)

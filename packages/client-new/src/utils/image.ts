@@ -21,3 +21,7 @@ export class Img {
         this.target.onload = this.onload
     }
 }
+
+
+
+export const img = (src: string) => new Img(src)

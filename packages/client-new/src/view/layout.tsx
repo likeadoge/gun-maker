@@ -9,21 +9,7 @@ import { css, View } from "@/utils/view";
     '.control': { height: '100px' }
 })
 export class MainLayout extends View<'screen'>{
-    // constructor() {
-    //     super()
-    //     this.$root = <div style={{ ...flex.row() }}>
-    //         <div className="content" style={{ ...flex.fill(), ...flex.col() }}>
-    //             <div className="control" style={{ ...flex.fixed() }}></div>
-    //             <div className="screen" style={{ ...flex.fill() }} {...this.slot('screen')}></div>
-    //         </div>
-    //         <div className="sider" style={{ ...flex.fixed() }}>
-    //         </div>
-    //     </div>
-
-
-    //     this.insert('screen', new CardContainer())
-
-    // }
+   
 
     created() {
         this.setRoot([div, style(flex.row()), [

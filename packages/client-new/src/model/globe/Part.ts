@@ -1,13 +1,13 @@
 import { Img } from "@/utils/image"
-import { Transfrom, Pos } from "@/utils/coordinate"
-import { Reactive } from "@/utils/reactive"
+import { Transfrom, Point } from "@//utils/coordinate"
+import {  rtive } from "@/utils/reactive"
 
 export class Part {
     image: Img
-    origin: Pos
+    origin: Point
     constructor(image: Img) {
         this.image = image
-        this.origin = new Pos(
+        this.origin = new Point(
             this.image.size.width * 0.5,
             this.image.size.height * 0.5
         )
@@ -15,4 +15,4 @@ export class Part {
     transforms: Transfrom[] = []
 }
 
-export const parts = new Reactive<Part[]>([])
+export const parts = rtive<Part[]>([])

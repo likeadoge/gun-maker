@@ -1,12 +1,12 @@
 import { Reactive } from "@/utils/reactive"
-import { Size } from "@/utils/position"
-import { Move, Pos, Scale } from "@/utils/coordinate"
+import { size } from "@/utils/position"
+import { move, point, scale } from "@/utils/coordinate"
 
 export class Working {
     screen = {
-        size: new Reactive(new Size(100, 100)),
-        move: new Reactive(new Move(new Pos(0))),
-        scale: new Reactive(new Scale(new Pos(0)))
+        size: new Reactive(size(100, 100)),
+        move: new Reactive(move(point(0))),
+        scale: new Reactive(scale(point(0)))
     }
 }
 
