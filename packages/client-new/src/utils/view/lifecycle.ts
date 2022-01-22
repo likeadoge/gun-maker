@@ -7,7 +7,6 @@ export class LifeCycle<SlotIds extends string = never> extends Slot<SlotIds>{
     constructor() {
         super()
         this.done = this.asyncUpdate(() => this.created())
-        console.log(this)
         // Promise.all([this.done].concat(this.children.map(v => v.done)))
         //     .then(() => this.completed())
     }

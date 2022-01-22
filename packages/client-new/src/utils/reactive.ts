@@ -247,4 +247,4 @@ export class CacheList<S, T> extends Ref<T[]> implements Watcher<S[]>{
 }
 
 
-export const rtive = <T>(v:T)=> new Reactive(v)
+export const rVal = <T>(v:T)=> new Reactive(v)

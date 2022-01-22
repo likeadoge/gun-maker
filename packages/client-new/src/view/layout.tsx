@@ -15,7 +15,7 @@ export class MainLayout extends View<'screen'>{
         this.setRoot([div, style(flex.row()), [
             [div, cls('content'), style(flex.fill(), flex.col()), [
                 [div, cls('control'), style(flex.fixed())],
-                [div, cls('screen'), style(flex.fill()), [new CardContainer()]],
+                [div, cls('screen'), style(flex.fill()), [new CardContainer().insert('inner',[div,style({width:'100%',height:'100%'}) ,this.slot('screen')])]],
             ]],
             [div, cls('sider'), style(flex.fixed())],
         ]])

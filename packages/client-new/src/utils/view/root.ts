@@ -26,10 +26,8 @@ export class Root extends Update {
     protected createElement(el: DomOption<HTMLElement>) {
         const constractor = this.constractor || (this.constractor = Object.getPrototypeOf(this).constructor)
         const ids = get_view_constractor_ids(constractor)
-        console.log(ids)
         return create_element(el,
             (element) => { 
-                console.log(element)
                 ids.forEach(id=> element.setAttribute(`data-eid-${id}`,'') )},
             (child) => { this.children = this.children.concat([child]) }
         )

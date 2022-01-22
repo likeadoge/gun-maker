@@ -1,11 +1,12 @@
+import { Simple } from "./object"
 
-export class Point {
+export class Point extends Simple<Point>() {
+
     x: number = 0 // left
     y: number = 0 // top
 
-    constructor(x: number, y: number = x) {
-        this.x = x
-        this.y = y
+    static create(x: number, y: number = x) {
+        return Point.new({ x, y })
     }
 }
 
@@ -63,11 +64,15 @@ export class Matrix3x3 {
 }
 
 export abstract class Transfrom {
+    static move(offset: Point = Point.create(0)) { return new Move(offset) }
+    static scale(ratio: Point = Point.create(1)) { return new Scale(ratio) }
+    static rotate(angle: number = 0) { return new Rotate(angle) }
+
     abstract matrix(res?: Matrix3x3): Matrix3x3
 }
 
 export class Move extends Transfrom {
-    offset = new Point(0, 0)
+    offset = Point.create(0, 0)
 
     constructor(pos: Point) {
         super()
@@ -88,7 +93,7 @@ export class Move extends Transfrom {
 }
 
 export class Scale extends Transfrom {
-    ratio = new Point(0, 0)
+    ratio = Point.create(0, 0)
 
 
     constructor(ratio: Point) {
@@ -137,30 +142,25 @@ export class Rotate extends Transfrom {
 
 }
 
-export class XoY {
-    base: Symbol | XoY
+// export class XoY {
+//     base: Symbol | XoY
 
-    private transfroms: (Scale | Move)[] = []
+//     private transfroms: (Scale | Move)[] = []
 
-    static from(xoy: XoY) {
-        return new XoY(xoy)
-    }
+//     static from(xoy: XoY) {
+//         return new XoY(xoy)
+//     }
 
-    constructor(base: (Symbol | XoY) = Symbol()) {
-        this.base = base
-    }
+//     constructor(base: (Symbol | XoY) = Symbol()) {
+//         this.base = base
+//     }
 
-    update(t: (Scale | Move)[]) {
-        this.transfroms = t
-        return this
-    }
-    getTransfroms() {
-        return this.transfroms
-    }
-}
+//     update(t: (Scale | Move)[]) {
+//         this.transfroms = t
+//         return this
+//     }
+//     getTransfroms() {
+//         return this.transfroms
+//     }
+// }
 
-
-export const point = (x: number, y: number = x) => new Point(x, y)
-export const move = (p:Point) => new Move(p)
-export const scale = (p:Point) => new Scale(p)
-export const rotate = (p:number) => new Rotate(p)

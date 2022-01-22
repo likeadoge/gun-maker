@@ -1,28 +1,23 @@
-export class Size {
+import { Simple } from "./object"
+
+export class Size extends Simple<Size>(){
     height: number = 100
     width: number = 100
 
-
-    constructor(width: number, height: number) {
-        this.width = width
-        this.height = height
-    }
-
-    scale(fn: (n: number) => number) {
-        return new Size(fn(this.width), fn(this.height))
+    static create(width: number, height: number) {
+        return  Size.new({ width, height })
     }
 }
 
-export class Positon {
+export class Positon extends Simple<Positon>(){
     top: number = 0
     left: number = 0
-    constructor(top: number, left: number) {
-        this.top = top
-        this.left = left
+
+    static create(top: number = 0, left: number = 0) {
+        return Positon.new({ top, left })
     }
 }
 
 
-export const position = (top: number, left: number = top) => new Positon(top, left)
+console.log(Size.create(1,2))
 
-export const size = (width: number, height: number = width) => new Positon(width, height)

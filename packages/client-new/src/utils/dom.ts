@@ -110,10 +110,12 @@ export type DomOption<T extends HTMLElement> = ([DomCreator<T>, ...(DomDecorator
     | ([DomCreator<T>, ...(DomDecorator[]), DomChildren])
 
 export const div = () => document.createElement('div')
+export const canvas = ()=> document.createElement('canvas')
 export const attr = (attrs: { [key: string]: string }) => new DomAttrDecorator(attrs)
 export const id = (id: string) => new DomIdDecorator(id)
 export const style = (...style: Partial<CSSStyleDeclaration>[]) => new DomStyleDecorator(style.reduce((a, b) => Object.assign(a, b), {}))
 export const cls = (...list: string[]) => new DomClassListDecorator(list)
+
 
 export const create_element = <T extends HTMLElement>(
     option: DomOption<T>,

@@ -58,3 +58,5 @@ export const flex = {
         'flex-direction': 'column'
     })
 }
+
+export const full = ()=>css({'height':'100%','width':'100%'})
