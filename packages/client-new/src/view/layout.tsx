@@ -8,14 +8,14 @@ import { css, View } from "@/utils/view";
     '.content': {},
     '.control': { height: '100px' }
 })
-export class MainLayout extends View<'screen'>{
-   
+export class MainLayout extends View<'screen' | 'control'>{
+
 
     created() {
         this.setRoot([div, style(flex.row()), [
             [div, cls('content'), style(flex.fill(), flex.col()), [
-                [div, cls('control'), style(flex.fixed())],
-                [div, cls('screen'), style(flex.fill()), [new CardContainer().insert('inner',[div,style({width:'100%',height:'100%'}) ,this.slot('screen')])]],
+                [div, cls('control'), this.slot('control'), style(flex.fixed(),{padding:'45px 0'})],
+                [div, cls('screen'), style(flex.fill()), [new CardContainer().insert('inner', [div, style({ width: '100%', height: '100%' }), this.slot('screen')])]],
             ]],
             [div, cls('sider'), style(flex.fixed())],
         ]])

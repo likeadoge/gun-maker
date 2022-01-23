@@ -66,6 +66,10 @@ export class Reactive<T> extends Mut<T>{
         this.#watchers.forEach(v => v.emit(this, old))
         this.emitParents()
     }
+    // 刷新
+    refresh(){
+        this.update(this.#val)
+    }
     // 添加一个 watcher
     attach(watcher: Watcher<T>) {
         this.#watchers = this.#watchers.filter(v => v != watcher).concat([watcher])

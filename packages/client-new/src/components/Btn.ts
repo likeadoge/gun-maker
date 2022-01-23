@@ -1,107 +1,25 @@
-import { Effect, Mut } from "@/utils/reactive";
-import { shadow, transition } from "@/style/common";
-import { css, View } from '@/utils/view'
+import { shadow } from "@/style/common";
+import { cls, div, refs } from "@/utils/dom";
+import { Reactive, Watcher } from "@/utils/reactive";
+import { css, View } from "@/utils/view";
 
-
-@css('.btn-group', v => v.className += 'btn-group', {
-    '': {
-        'display': 'flex',
-        'padding': '6px',
-        'flexDirection': 'row',
-        'justifyContent': 'left',
-        'alignItems': 'center',
-    }
-})
-export class BtnGroup extends View {
-
-
-}
-
-
-// @css('.btn', v => v.className += 'btn', {
-//     '': {
-//         ...shadow(3),
-//         ...transition(),
-//         'cursor': 'pointer',
-//         'margin': '6px',
-//         'background-color': '#ff1744',
-//         'color': '#fff',
-//         'font-size': '36px',
-//         'padding': '3px 6px',
-//         'border-radius': '3px',
-//     },
-//     '&:hover': {
-//         ...shadow(5),
-//         'opacity': '0.85'
-//     },
-//     '&:active': {
-//         ...shadow(0),
-//     }
-// })
-// export class Btn extends View {
-
-// }
-
-
-@css('.toggle-btn', v => v.classList.add('toggle-btn'), {
-    '&': {
-        ...shadow(0),
-        ...transition(),
-        'cursor': 'pointer',
-        'margin': '6px',
-        'backgroundColor': '#ff1744',
-        'color': '#fff',
-        'filter': 'grayscale(100%)',
-        'fontSize': '36px',
-        'padding': '3px 6px',
-        'borderRadius': '3px',
-    },
-    '&:hover': {
-        'opacity': '0.85'
-    },
-    "&.selected": {
-        ...shadow(4),
-        'filter': 'grayscale(0)',
-    },
-})
-export class ToggleBtn extends View {
-
-    status: Mut<boolean>
-
-    effect: Effect<boolean>
-
-    constructor(status: Mut<boolean>) {
-        super()
-        this.status = status
-        this.$root.onclick = () => this.status.update(!this.status.val())
-        this.effect = new Effect(v => this.$root.classList[v ? 'add' : 'remove']('selected'))
-        this.status.attach(this.effect)
-    }
-
-    destroy() {
-        super.destroy()
-        this.status.detach(this.effect)
-    }
-}
-
-
-@css('.slider-btn', v => v.classList.add('slider-btn'), {
-    '&': {
+@css({
+    '.slider-btn': {
         'position': 'relative',
         'margin': '0 12px',
-        'padding': '12px 0'
+        'padding': '13px 0'
     },
-    '&::before': {
+    '.slider-btn::before': {
         'content': '""',
         'display': 'block',
         'height': '4px',
         'borderRadius': '2px',
         'position': 'relative',
-        'background': '#66ccff',
+        'background': '#fff',
 
     },
-    'div': {
-        ...shadow(4),
+    '.slider-btn-slider': {
+        ...shadow(3),
         'top': '2px',
         'position': 'absolute',
         'height': '24px',
@@ -112,29 +30,48 @@ export class ToggleBtn extends View {
         'transform': 'translateX(-12px)'
     },
 })
+export class SliderButton extends View<never> implements Watcher<number>{
 
-export class SliderBtn extends View {
-    status: Mut<number>
-    effect: Effect<number>
-    slider: HTMLDivElement
+    target: Reactive<number>
+    current: number
     move: SliderMovement
-    constructor(status: Mut<number>) {
+
+    refs = refs('root', 'slider')
+
+    constructor(target: Reactive<number>) {
         super()
-        this.status = status
-        this.effect = new Effect(v => {
-            this.slider.style.left = v * 100 + '%'
-        })
-        this.slider = document.createElement('div')
-        this.$root.appendChild(this.slider)
-        this.move = new SliderMovement(this.$root, this.slider)
-        this.status.attach(this.effect)
+        this.target = target
+        this.current = this.target.val()
+        this.setRoot([div, cls('slider-btn'), this.refs.root, [
+            [div, cls('slider-btn-slider'), this.refs.slider]
+        ]])
 
-        this.move.getNow = () => this.status.val()
-        this.move.move = (s) => { this.status.update(s) }
 
-        this.status.update(this.status.val())
+        this.move = new SliderMovement(
+            this.refs.root.target,
+            this.refs.slider.target
+        )
+
+        this.move.getNow = () => this.target.val()
+        this.move.move = (s) => { this.target.update(s) }
+
+        
+        this.target.attach(this)
+        this.target.refresh()
+
+    }
+
+    emit() {
+        this.refs.slider.target.style.left = this.target.val() * 100 + "%"
+    }
+
+    destroy(): void {
+        super.destroy()
+        this.target.detach(this)
     }
 }
+
+
 class SliderMovement {
 
     el: HTMLElement
@@ -154,7 +91,7 @@ class SliderMovement {
 
             let { width } = this.el.getBoundingClientRect()
 
-            const move = (e:MouseEvent) => {
+            const move = (e: MouseEvent) => {
                 if (!this.from)
                     return
                 else if (this.from === 'start')
@@ -168,16 +105,16 @@ class SliderMovement {
             }
             const done = () => {
                 this.el.classList.remove('mouse-move')
-                document.removeEventListener('mousemove',move)
-                document.removeEventListener('mouseleave',done)
-                document.removeEventListener('mouseup',done)
+                document.removeEventListener('mousemove', move)
+                document.removeEventListener('mouseleave', done)
+                document.removeEventListener('mouseup', done)
                 this.done()
                 this.from = undefined
             }
 
-            document.addEventListener('mousemove',move)
-            document.addEventListener('mouseleave',done)
-            document.addEventListener('mouseup',done)
+            document.addEventListener('mousemove', move)
+            document.addEventListener('mouseleave', done)
+            document.addEventListener('mouseup', done)
         }
 
     }

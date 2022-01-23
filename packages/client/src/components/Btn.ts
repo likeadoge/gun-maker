@@ -1,6 +1,5 @@
 import { Effect, Mut } from "@/reactive/base";
 import { shadow, transition } from "@/style";
-import { Pos } from "@/utils";
 import { css, View } from '@/utils/view'
 
 

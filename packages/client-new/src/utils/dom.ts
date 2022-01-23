@@ -36,7 +36,6 @@ export class DomClassListDecorator extends DomDecorator {
     }
 }
 
-
 export class DomIdDecorator extends DomDecorator {
     private id: string
 
@@ -63,7 +62,7 @@ export class DomStyleDecorator extends DomDecorator {
     }
 }
 
-export class DomSlotDecortor extends DomDecorator {
+export class DomSlotDecorator extends DomDecorator {
 
     root: Slot<string>
     slotId: string
@@ -106,16 +105,30 @@ export class DomSlotDecortor extends DomDecorator {
     }
 }
 
+export class DomRefDecorator extends DomDecorator {
+
+    target: HTMLElement = document.createElement('div')
+
+    decorate(ele: HTMLElement): void { this.target = ele }
+
+}
+
 export type DomOption<T extends HTMLElement> = ([DomCreator<T>, ...(DomDecorator[])])
     | ([DomCreator<T>, ...(DomDecorator[]), DomChildren])
 
 export const div = () => document.createElement('div')
-export const canvas = ()=> document.createElement('canvas')
+export const canvas = () => document.createElement('canvas')
 export const attr = (attrs: { [key: string]: string }) => new DomAttrDecorator(attrs)
 export const id = (id: string) => new DomIdDecorator(id)
 export const style = (...style: Partial<CSSStyleDeclaration>[]) => new DomStyleDecorator(style.reduce((a, b) => Object.assign(a, b), {}))
 export const cls = (...list: string[]) => new DomClassListDecorator(list)
-
+export const refs = <T extends string>(...refs:T[])=>{
+    const s = {} as {[key in T]:DomRefDecorator}
+    refs.forEach(name=>{
+        s[name] = new DomRefDecorator()
+    })
+    return s
+}
 
 export const create_element = <T extends HTMLElement>(
     option: DomOption<T>,
