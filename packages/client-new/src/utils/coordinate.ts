@@ -11,6 +11,8 @@ export class Point extends Simple<Point>() {
 }
 
 export class Matrix3x3 {
+    static blank = ()=> new Matrix3x3()
+
     static mul(
         x1_1: number, x1_2: number, x1_3: number,
         x2_1: number, x2_2: number, x2_3: number,

@@ -1,7 +1,7 @@
 import { shadow } from "@/style/common";
 import { cls, div, refs } from "@/utils/dom";
-import { Reactive, Watcher } from "@/utils/reactive";
-import { css, View } from "@/utils/view";
+import { Mut, Reactive, Watcher } from "@/utils/reactive";
+import { css, View, WatcherView } from "@/utils/view";
 
 @css({
     '.slider-btn': {
@@ -10,6 +10,7 @@ import { css, View } from "@/utils/view";
         'padding': '13px 0'
     },
     '.slider-btn::before': {
+        ...shadow(4),
         'content': '""',
         'display': 'block',
         'height': '4px',
@@ -19,7 +20,7 @@ import { css, View } from "@/utils/view";
 
     },
     '.slider-btn-slider': {
-        ...shadow(3),
+        ...shadow(4),
         'top': '2px',
         'position': 'absolute',
         'height': '24px',
@@ -30,15 +31,15 @@ import { css, View } from "@/utils/view";
         'transform': 'translateX(-12px)'
     },
 })
-export class SliderButton extends View<never> implements Watcher<number>{
+export class SliderButton extends WatcherView<never> implements Watcher<number>{
 
-    target: Reactive<number>
+    target: Mut<number>
     current: number
     move: SliderMovement
 
     refs = refs('root', 'slider')
 
-    constructor(target: Reactive<number>) {
+    constructor(target: Mut<number>) {
         super()
         this.target = target
         this.current = this.target.val()
@@ -57,7 +58,8 @@ export class SliderButton extends View<never> implements Watcher<number>{
 
         
         this.target.attach(this)
-        this.target.refresh()
+
+        this.emit()
 
     }
 
@@ -65,10 +67,6 @@ export class SliderButton extends View<never> implements Watcher<number>{
         this.refs.slider.target.style.left = this.target.val() * 100 + "%"
     }
 
-    destroy(): void {
-        super.destroy()
-        this.target.detach(this)
-    }
 }
 
 

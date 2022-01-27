@@ -1,22 +1,23 @@
-import { working } from '@/model/globe/Working'
+import { Working } from '@/model/globe/Working'
 import { full } from '@/style/common';
 import { CanvasHandle } from '@/utils/canvas';
-import { Move, Point, Transfrom } from '@/utils/coordinate';
+import { Matrix3x3, Move, Point, Scale, Transfrom } from '@/utils/coordinate';
 import { canvas, div } from '@/utils/dom';
 import { Size } from '@/utils/position';
-import { Reactive, Watcher } from '@/utils/reactive';
+import { Ref, Watcher } from '@/utils/reactive';
 import { MouseMovement } from '@/utils/touch';
-import { css, View } from '@/utils/view';
+import { css, WatcherView } from '@/utils/view';
 
-const size = working.screen.size
-const offset = working.screen.offset
+const size = Working.screen.size
+const scale = Working.screen.scale
+const offset = Working.screen.offset
 
 
 @css({
     '': { ...full(), 'overflow': 'hidden' },
     'canvas': { 'background': 'transparent' }
 })
-export class WorkScreen extends View<never> implements Watcher<Size>, Watcher<Move>{
+export class WorkScreen extends WatcherView<never> implements Watcher<Size>, Watcher<Move>, Watcher<Scale>{
 
 
     private handle: CanvasHandle<HTMLCanvasElement> = new CanvasHandle(canvas())
@@ -52,6 +53,7 @@ export class WorkScreen extends View<never> implements Watcher<Size>, Watcher<Mo
         }
 
         size.attach(this)
+        scale.attach(this)
         offset.attach(this)
     }
 
@@ -63,19 +65,18 @@ export class WorkScreen extends View<never> implements Watcher<Size>, Watcher<Mo
 
     private render() {
         this.handle.clear()
-        this.handle.transform(offset.val().matrix())
+        const matrix = Matrix3x3.blank()
+        offset.val().matrix(matrix)
+        scale.val().matrix(matrix)
+        this.handle.transform(matrix)
         this.handle.rect(Point.create(0), Size.create(10, 10), { fill: true })
     }
 
 
-    emit(r: Reactive<Size> | Reactive<Move>) {
+    emit(r: Ref<Size> | Ref<Move> | Ref<Scale>) {
+        console.log(1)
         if (r === size) this.resize()
         this.render()
-    }
-
-    destroy(): void {
-        super.destroy()
-        size.detach(this)
     }
 
 

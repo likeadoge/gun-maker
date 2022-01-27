@@ -1,12 +1,14 @@
-import { rVal } from "@/utils/reactive"
+import { R } from "@/utils/reactive"
 import { Size } from "@/utils/position"
-import { Transfrom } from "@/utils/coordinate"
+import { Point, Scale, Transfrom } from "@/utils/coordinate"
 
-export class Working {
+export const Working = new class {
     screen = {
-        size: rVal(Size.create(100, 100)),
-        offset: rVal(Transfrom.move())
+        size: R.val(Size.create(100, 100)),
+        scale: R.val(Transfrom.scale(Point.create(1))),
+        offset: R.val(Transfrom.move())
     }
-}
+}()
 
-export const working = new Working()
+
+Working.screen.scale.attach(R.effect((v)=>console.log('work-screen scale change',v)))
