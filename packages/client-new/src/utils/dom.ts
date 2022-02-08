@@ -122,6 +122,7 @@ export const attr = (attrs: { [key: string]: string }) => new DomAttrDecorator(a
 export const id = (id: string) => new DomIdDecorator(id)
 export const style = (...style: Partial<CSSStyleDeclaration>[]) => new DomStyleDecorator(style.reduce((a, b) => Object.assign(a, b), {}))
 export const cls = (...list: string[]) => new DomClassListDecorator(list)
+
 export const refs = <T extends string>(...refs:T[])=>{
     const s = {} as {[key in T]:DomRefDecorator}
     refs.forEach(name=>{

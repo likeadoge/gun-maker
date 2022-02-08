@@ -8,7 +8,7 @@ export class Img extends Simple<Img>(){
 
     static src(src: string) {
 
-        return new Promise((res, rej) => {
+        return new Promise<Img>((res, rej) => {
             const name = src
             const target = new Image()
             const size = Size.create(0, 0)

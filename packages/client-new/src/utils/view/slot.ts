@@ -19,7 +19,6 @@ export class Slot<SlotIds extends string = never> extends Root {
         const ele = node instanceof Array ? this.createElement(node) : node
         this.syncUpdate(() => {
             const pa = this.slotTable[sid]
-            console.log(sid,pa)
             if (pa instanceof DomSlotDecorator) {
                 pa.insert(ele)
             }

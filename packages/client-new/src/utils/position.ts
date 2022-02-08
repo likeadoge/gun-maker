@@ -18,6 +18,3 @@ export class Positon extends Simple<Positon>(){
     }
 }
 
-
-console.log(Size.create(1,2))
-

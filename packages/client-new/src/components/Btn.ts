@@ -1,7 +1,7 @@
 import { shadow } from "@/style/common";
 import { cls, div, refs } from "@/utils/dom";
-import { Mut, Reactive, Watcher } from "@/utils/reactive";
-import { css, View, WatcherView } from "@/utils/view";
+import { Mut, Watcher } from "@/utils/reactive";
+import { css, WatcherView } from "@/utils/view";
 
 @css({
     '.slider-btn': {
@@ -10,24 +10,24 @@ import { css, View, WatcherView } from "@/utils/view";
         'padding': '13px 0'
     },
     '.slider-btn::before': {
-        ...shadow(4),
+        ...shadow(2),
         'content': '""',
         'display': 'block',
         'height': '4px',
         'borderRadius': '2px',
         'position': 'relative',
-        'background': '#fff',
+        'background': '#ddd',
 
     },
     '.slider-btn-slider': {
-        ...shadow(4),
+        ...shadow(3),
         'top': '2px',
         'position': 'absolute',
         'height': '24px',
         'width': '24px',
         'cursor': 'pointer',
         'borderRadius': '50%',
-        'background': '#ff1744',
+        'background': '#66ccff',
         'transform': 'translateX(-12px)'
     },
 })

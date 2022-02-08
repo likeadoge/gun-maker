@@ -29,8 +29,8 @@ export class CanvasHandle<T extends CanvasLike> {
 
     // 通过坐标计算位置
     positon(p: Point, { left_top }: { left_top?: Size } = {}) {
-        const top = this.size.height / 2 - p.y - (left_top ? left_top.height / 2 : 0)
-        const left = this.size.width / 2 + p.x - (left_top ? left_top.width / 2 : 0)
+        const top = - p.y - (left_top ? left_top.height / 2 : 0)
+        const left =  p.x - (left_top ? left_top.width / 2 : 0)
         return Positon.create(top, left)
     }
 
@@ -41,16 +41,16 @@ export class CanvasHandle<T extends CanvasLike> {
         this.ctx.clearRect(0, 0, this.target.width, this.target.height)
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0)';
         this.ctx.fillRect(0, 0, this.target.width, this.target.height)
+        this.ctx.translate(this.target.width/2,this.target.height/2)
     }
 
     // 矩阵变换
     transform(m: Matrix3x3 | null) {
-        console.log(m)
         if (!m)
             this.ctx.resetTransform()
         else {
             const [a, c, e, b, d, f] = m.val
-            this.ctx.setTransform(a, b, c, d, e, f)
+            this.ctx.transform(a, b, c, d, e, f)
         }
     }
 
