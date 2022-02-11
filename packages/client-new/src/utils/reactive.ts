@@ -165,10 +165,31 @@ export class Effect<T> implements Watcher<T>{
     emit(v: Ref<T>) { this.fn(v.val()) }
 }
 
+export class CacheList<S, T> extends Ref<T[]> implements Watcher<S[]>{
+    private fn: (s: S) => T
+    protected value: T[]
+
+    constructor(val: Ref<S[]>, fn: (s: S) => T) {
+        super()
+        this.fn = fn
+        this.value = val.val().map(v => this.fn(v))
+        val.attach(this)
+    }
+
+    emit(val: Ref<S[]>) {
+        this.value = val.val().map(v => this.fn(v))
+    }
+
+    recycle() {
+        R.recycle(this)
+    }
+}
+
 export const R = new class {
     val = <T>(v: T) => new Reactive(v)
     effect = <T>(fn: (val: T) => void) => new Effect(fn)
     recycle = (watcher: Watcher<any>) => { ReactiveBinder.recycle(watcher) }
-    compute = <T>(fn:()=>T)=> new Computed(fn)
-    translate = <T>(generate:()=>T,update:(t:T)=>void)=> new Translate(generate,update)
+    compute = <T>(fn: () => T) => new Computed(fn)
+    translate = <T>(generate: () => T, update: (t: T) => void) => new Translate(generate, update)
+    map = <S, T>(val: Ref<S[]>, fn: (s: S) => T) => new CacheList(val, fn)
 }

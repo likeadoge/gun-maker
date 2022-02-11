@@ -1,27 +1,30 @@
 import { Global } from '@/model/Global'
+import { GunPart } from '@/model/GunPart';
 import { full } from '@/style/common';
 import { CanvasHandle } from '@/utils/canvas';
 import { Matrix3x3, Move, Point, Scale, Transfrom } from '@/utils/coordinate';
 import { canvas, div } from '@/utils/dom';
 import { Size } from '@/utils/position';
-import { Ref, Watcher } from '@/utils/reactive';
+import { Mut, R, ReactiveBinder, Ref, Watcher } from '@/utils/reactive';
 import { MouseMovement } from '@/utils/touch';
 import { css, WatcherView } from '@/utils/view';
 
 const size = Global.preview.size
 const scale = Global.preview.scale
 const offset = Global.preview.offset
+const parts = Global.parts
 
 
 @css({
     '': { ...full(), 'overflow': 'hidden' },
     'canvas': { 'background': 'transparent' }
 })
-export class PreviewScreen extends WatcherView<never> implements Watcher<Size>, Watcher<Move>, Watcher<Scale>{
+export class PreviewScreen extends WatcherView<never> implements Watcher<PreviewGunPartLayer[]>, Watcher<Size>, Watcher<Move>, Watcher<Scale>{
 
 
-    private handle: CanvasHandle<HTMLCanvasElement> = new CanvasHandle(canvas())
+    private handle: CanvasHandle<HTMLCanvasElement> = CanvasHandle.element()
     private movement: MouseMovement = MouseMovement.create()
+    private layers = R.compute(() => parts.val().map(part => new PreviewGunPartLayer(this, part)))
 
     private ro = new ResizeObserver(entries => {
         for (let entry of entries) {
@@ -48,13 +51,16 @@ export class PreviewScreen extends WatcherView<never> implements Watcher<Size>, 
         this.movement.move = (from, move) => {
             const s = scale.val().ratio.x
             offset.update(Transfrom.move(
-                Point.create(from.x + move.x/s, from.y + move.y/s)
+                Point.create(from.x + move.x / s, from.y + move.y / s)
             ))
         }
 
         size.attach(this)
         scale.attach(this)
         offset.attach(this)
+        this.layers.attach(this)
+
+        console.log('ref', ReactiveBinder.refs.get(this.layers))
     }
 
 
@@ -62,18 +68,24 @@ export class PreviewScreen extends WatcherView<never> implements Watcher<Size>, 
         this.handle.resize(size.val())
     }
 
-
-    private render() {
+    render() {
         this.handle.clear()
         const matrix = Matrix3x3.blank()
         scale.val().matrix(matrix)
         offset.val().matrix(matrix)
         this.handle.transform(matrix)
         this.handle.rect(Point.create(0), Size.create(10, 10), { fill: true })
+        console.log('render',this.layers.val())
+
+        this.handle.transform(null)
+        this.layers.val().forEach(layer => {
+            console.log(layer.handle)
+            this.handle.source(layer.handle, Point.create(0))
+        })
     }
 
-
-    emit(r: Ref<Size> | Ref<Move> | Ref<Scale>) {
+    emit(r: Ref<Size> | Ref<Move> | Ref<Scale> | Ref<PreviewGunPartLayer[]>) {
+        console.log('emit', r)
         if (r === size) this.resize()
         this.render()
     }
@@ -82,5 +94,51 @@ export class PreviewScreen extends WatcherView<never> implements Watcher<Size>, 
 }
 
 
-class PreviewLayer {
+class PreviewGunPartLayer implements Watcher<GunPart>, Watcher<Size>, Watcher<Move>, Watcher<Scale>{
+
+
+    handle: CanvasHandle<any>
+    private screen: PreviewScreen
+    part: Ref<GunPart>
+
+    constructor(screen: PreviewScreen, part: Ref<GunPart>) {
+        this.screen = screen
+        this.part = part
+        part.attach(this)
+        this.handle = CanvasHandle.element()
+        this.handle.resize(size.val())
+
+        ;(window as any).s?(window as any).s.push(this): (window as any).s = [this]
+    }
+
+    render() {
+        this.handle.clear()
+        // const matrix = Matrix3x3.blank()
+        // scale.val().matrix(matrix)
+        // offset.val().matrix(matrix)
+        // this.handle.transform(matrix)
+        this.handle.source(this.part.val().image, Point.create(0))
+    }
+
+    resize() {
+        this.handle.resize(size.val())
+    }
+
+    remove() {
+        this.render()
+    }
+
+    rescale() {
+        this.render()
+    }
+
+    recycle() {
+        R.recycle(this)
+    }
+
+    emit() {
+        this.screen.render()
+    }
 }
+
+

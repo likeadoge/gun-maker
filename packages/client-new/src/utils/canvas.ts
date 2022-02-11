@@ -8,6 +8,16 @@ type CanvasCtx<T extends CanvasLike> = T extends HTMLCanvasElement ? CanvasRende
     : never
 
 export class CanvasHandle<T extends CanvasLike> {
+
+    static offscreen(size: Size) {
+        return new CanvasHandle(new OffscreenCanvas(size.width, size.height))
+    }
+
+    static element(canvas: HTMLCanvasElement = document.createElement('canvas')) {
+        return new CanvasHandle(canvas)
+    }
+
+
     target: T
     private ctx: CanvasCtx<T>
 
@@ -19,6 +29,7 @@ export class CanvasHandle<T extends CanvasLike> {
         this.ctx = ctx as CanvasCtx<T>
 
         this.size = Size.create(this.target.width, this.target.height)
+        this.ctx.translate(this.target.width / 2, this.target.height / 2)
     }
 
     size: Size
@@ -30,7 +41,7 @@ export class CanvasHandle<T extends CanvasLike> {
     // 通过坐标计算位置
     positon(p: Point, { left_top }: { left_top?: Size } = {}) {
         const top = - p.y - (left_top ? left_top.height / 2 : 0)
-        const left =  p.x - (left_top ? left_top.width / 2 : 0)
+        const left = p.x - (left_top ? left_top.width / 2 : 0)
         return Positon.create(top, left)
     }
 
@@ -41,13 +52,16 @@ export class CanvasHandle<T extends CanvasLike> {
         this.ctx.clearRect(0, 0, this.target.width, this.target.height)
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0)';
         this.ctx.fillRect(0, 0, this.target.width, this.target.height)
-        this.ctx.translate(this.target.width/2,this.target.height/2)
+        this.ctx.translate(this.target.width / 2, this.target.height / 2)
     }
+
 
     // 矩阵变换
     transform(m: Matrix3x3 | null) {
-        if (!m)
+        if (!m) {
             this.ctx.resetTransform()
+            this.ctx.translate(this.target.width / 2, this.target.height / 2)
+        }
         else {
             const [a, c, e, b, d, f] = m.val
             this.ctx.transform(a, b, c, d, e, f)
@@ -57,7 +71,7 @@ export class CanvasHandle<T extends CanvasLike> {
     rect(pos: Point, size: Size,
         { fill = true }: { fill?: boolean } = {}
     ) {
-        const p = this.positon(pos,{left_top:size})
+        const p = this.positon(pos, { left_top: size })
 
         if (fill) {
             this.ctx.fillStyle = 'rgb(0,0,0)'

@@ -12,7 +12,9 @@ export class Img extends Simple<Img>(){
             const name = src
             const target = new Image()
             const size = Size.create(0, 0)
+            target.src = src
 
+            
             target.onload = () => {
                 size.width = target.width
                 size.height = target.height
