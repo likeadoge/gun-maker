@@ -7,6 +7,10 @@ export class Size extends Simple<Size>(){
     static create(width: number, height: number) {
         return  Size.new({ width, height })
     }
+
+    static window(){
+        return Size.new({width:window.innerWidth,height:window.innerHeight})
+    }
 }
 
 export class Positon extends Simple<Positon>(){

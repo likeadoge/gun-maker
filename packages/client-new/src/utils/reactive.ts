@@ -92,7 +92,11 @@ export class Computed<T> extends Ref<T> implements Watcher<any>{
     }
 
     emit() {
-        this.value = this.createValue()
+        const old = this.value
+        this.value = this.createValue();
+
+        (ReactiveBinder.watchers.get(this) ?? [])
+            .forEach(v => v.emit(this, old))
     }
 
     private createValue() {

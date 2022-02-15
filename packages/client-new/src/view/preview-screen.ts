@@ -59,8 +59,7 @@ export class PreviewScreen extends WatcherView<never> implements Watcher<Preview
         scale.attach(this)
         offset.attach(this)
         this.layers.attach(this)
-
-        console.log('ref', ReactiveBinder.refs.get(this.layers))
+        
     }
 
 
@@ -75,17 +74,14 @@ export class PreviewScreen extends WatcherView<never> implements Watcher<Preview
         offset.val().matrix(matrix)
         this.handle.transform(matrix)
         this.handle.rect(Point.create(0), Size.create(10, 10), { fill: true })
-        console.log('render',this.layers.val())
 
         this.handle.transform(null)
         this.layers.val().forEach(layer => {
-            console.log(layer.handle)
             this.handle.source(layer.handle, Point.create(0))
         })
     }
 
     emit(r: Ref<Size> | Ref<Move> | Ref<Scale> | Ref<PreviewGunPartLayer[]>) {
-        console.log('emit', r)
         if (r === size) this.resize()
         this.render()
     }
@@ -105,18 +101,19 @@ class PreviewGunPartLayer implements Watcher<GunPart>, Watcher<Size>, Watcher<Mo
         this.screen = screen
         this.part = part
         part.attach(this)
-        this.handle = CanvasHandle.element()
+        this.handle = CanvasHandle.offscreen(size.val())
         this.handle.resize(size.val())
+        this.render()
 
         ;(window as any).s?(window as any).s.push(this): (window as any).s = [this]
     }
 
     render() {
         this.handle.clear()
-        // const matrix = Matrix3x3.blank()
-        // scale.val().matrix(matrix)
-        // offset.val().matrix(matrix)
-        // this.handle.transform(matrix)
+        const matrix = Matrix3x3.blank()
+        scale.val().matrix(matrix)
+        offset.val().matrix(matrix)
+        this.handle.transform(matrix)
         this.handle.source(this.part.val().image, Point.create(0))
     }
 
@@ -137,6 +134,7 @@ class PreviewGunPartLayer implements Watcher<GunPart>, Watcher<Size>, Watcher<Mo
     }
 
     emit() {
+        this.screen.render()
         this.screen.render()
     }
 }

@@ -7,10 +7,10 @@
     "lerna": "^4.0.0"
   },
   "scripts": {
-    "dev": "cd ./packages/client && npx vite",
-    "test": "cd ./packages/client && npx jest",
-    "test-c": "cd ./packages/client && npx jest --coverage",
-    "build": "cd ./packages/client && npx tsc && npx vite build"
+    "dev": "cd ./packages/client-new && npx vite",
+    "test": "cd ./packages/client-new && npx jest",
+    "test-c": "cd ./packages/client-new && npx jest --coverage",
+    "build": "cd ./packages/client-new && npx tsc && npx vite build"
   },
   "dependencies": {
     "query-string": "^7.1.0"
